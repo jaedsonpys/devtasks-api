@@ -1,0 +1,7 @@
+# enviroment
+venv/
+
+# build
+dist/
+build/
+*.egg-info
