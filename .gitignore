@@ -1,6 +1,9 @@
 # enviroment
 venv/
 
+# database
+*.cookiedb
+
 # build
 dist/
 build/
