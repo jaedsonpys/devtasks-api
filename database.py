@@ -4,7 +4,7 @@ import requests
 
 
 class Database:
-    def __init__(self):
+    def __init__(self) -> None:
         database_url = 'https://remote-cookiedb.herokuapp.com'
         database_pw = os.environ.get('DATABASE_PW')
 
