@@ -1,6 +1,8 @@
 from pysgi import PySGI
+from database import Database
 
 app = PySGI()
+db = Database()
 
 
 @app.route('/')
