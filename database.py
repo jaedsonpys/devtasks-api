@@ -26,7 +26,7 @@ class Database:
         }
 
         headers = {
-            'Authorization': f'Bearer {self.token}'
+            'Authorization': f'Bearer {self._token}'
         }
 
         request = requests.get(self._database_url, headers=headers, json=data)
