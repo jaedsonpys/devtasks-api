@@ -5,12 +5,14 @@ import requests
 
 class Database:
     def __init__(self) -> None:
-        self.database_url = 'https://remote-cookiedb.herokuapp.com'
+        self._cookiedb_api = 'https://remote-cookiedb.herokuapp.com'
+        self._database_url = self._cookiedb_api + '/database'
+
         self._token = self._login()
 
     def _login(self) -> str:
         database_pw = os.environ.get('DATABASE_PW')
-        request = requests.get(self.database_url + '/login', params={'password': database_pw})
+        request = requests.get(self._cookiedb_api + '/login', params={'password': database_pw})
 
         if request.status_code == 401:
             raise ConnectionError('Invalid database API password')
@@ -27,12 +29,12 @@ class Database:
             'Authorization': f'Bearer {self.token}'
         }
 
-        request = requests.get(self.database_url + '/database', headers=headers, json=data)
+        request = requests.get(self._database_url, headers=headers, json=data)
         tasks = {}
 
         if request.status_code == 401:
             self._token = self._login()
-            request = requests.get(self.database_url + '/database', headers=headers, json=data)
+            request = requests.get(self._database_url, headers=headers, json=data)
 
             if request.status_code == 200:
                 data = request.json()
