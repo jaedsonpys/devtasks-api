@@ -20,6 +20,37 @@ class Database:
         data = request.json()
         return data.get('token')
 
+    def check_user_exists(self, email: str) -> bool:
+        json_data = {
+            'path': f'devtasks/users/{email}'
+        }
+
+        headers = {
+            'Authorization': f'Bearer {self._token}'
+        }
+
+        request = requests.get(self._database_url, headers=headers, json=json_data)
+        user_exists = False
+
+        if request.status_code == 401:
+            self._token = self._login()
+            request = requests.get(self._database_url, headers=headers, json=data)
+
+            if request.status_code == 200:
+                data = request.json()
+                result = data.get('result')
+
+                if result:
+                    user_exists = result
+        elif request.status_code == 200:
+            data = request.json()
+            result = data.get('result')
+
+            if result:
+                user_exists = True
+
+        return user_exists
+
     def get_tasks(self) -> dict:
         data = {
             'path': 'devtasks/tasks/'
