@@ -1,13 +1,10 @@
 from pysgi import PySGI
 from cookiedb import CookieDB
 
+import utoken
+
 app = PySGI()
 db = CookieDB()
-
-
-@app.route('/')
-def index():
-    return 'Hello world!'
 
 
 if __name__ == '__main__':
