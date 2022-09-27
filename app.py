@@ -1,18 +1,17 @@
 import hashlib
 import os
-from datetime import datetime, timedelta
 
-import utoken
 from cookiedb import CookieDB
 from pysgi import PySGI
 
+from auth import UserAuth
+
 app = PySGI()
+user_auth = UserAuth()
 db = CookieDB()
 
 db.create_database('devtasks', if_not_exists=True)
 db.open('devtasks')
-
-UTOKEN_KEY = os.environ.get('UTOKEN_KEY', 'secret-key')
 
 
 @app.route('/api/register', methods=['POST'])
@@ -29,9 +28,7 @@ def register(request):
 
     if not user_exists:
         hashed_pw = hashlib.sha256(password.encode()).hexdigest()
-
-        token_exp = datetime.now() + timedelta(minutes=5)
-        auth_token = utoken.encode({'email': email, 'max-time': token_exp}, UTOKEN_KEY)
+        auth_token = user_auth.create_user_token(email)
 
         db.add(
             path=f'users/{email}',
@@ -73,8 +70,7 @@ def login(request):
         hashed_pw = hashlib.sha256(password.encode()).hexdigest()
 
         if hashed_original_pw == hashed_pw:
-            token_exp = datetime.now() + timedelta(minutes=5)
-            auth_token = utoken.encode({'email': email, 'max-time': token_exp}, UTOKEN_KEY)
+            auth_token = user_auth.create_user_token(email)
 
             login_data = {
                 'status': 'success',
