@@ -1,6 +1,6 @@
 import os
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
+from functools import wraps
 
 import utoken
 from utoken import exceptions as u_exception
@@ -25,3 +25,25 @@ class UserAuth:
             return False
         else:
             return True
+
+    def auth_required(self, func):
+        @wraps(func)
+        def decorator(request, *args, **kwargs):
+            authorization = request.headers.get('Authorization')
+
+            if not authorization:
+                return {'status': 'error', 'message': 'Unauthorized'}, 401
+
+            auth_type, token = authorization.split(' ')
+
+            if auth_type == 'Bearer':
+                if not self.has_valid_token(token):
+                    response = {'status': 'error', 'message': 'Invalid auth token'}, 401
+                else:
+                    response = func(request, *args, **kwargs)
+
+                return response
+            else:
+                return {'status': 'error', 'message': 'Please use Bearer Token'}, 401
+
+        return decorator
