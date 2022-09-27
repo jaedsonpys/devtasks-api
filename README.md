@@ -6,5 +6,5 @@ API for using the **DevTasks** application, developed using the [PySGI](https://
 
 To run the API, you only need to execute one command, but first, make sure you add the necessary environment variables:
 
-- `DATABASE_PW`: Remote CookieDB password;
+- `UTOKEN_KEY`: Utoken key;
 - `PORT`: PySGI port (to production).
