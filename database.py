@@ -8,9 +8,10 @@ class Database:
         self._cookiedb_api = 'https://remote-cookiedb.herokuapp.com'
         self._database_url = self._cookiedb_api + '/database'
 
-        self._token = self._login()
+        self._auth_header = {}
+        self._login()
 
-    def _login(self) -> str:
+    def _login(self) -> None:
         database_pw = os.environ.get('DATABASE_PW')
         request = requests.get(self._cookiedb_api + '/login', params={'password': database_pw})
 
@@ -18,23 +19,21 @@ class Database:
             raise ConnectionError('Invalid database API password')
 
         data = request.json()
-        return data.get('token')
+        self._auth_header = {
+            'Authorization': f'Bearer {data.get("token")}'
+        }
 
     def check_user_exists(self, email: str) -> bool:
         json_data = {
             'path': f'devtasks/users/{email}'
         }
 
-        headers = {
-            'Authorization': f'Bearer {self._token}'
-        }
-
-        request = requests.get(self._database_url, headers=headers, json=json_data)
+        request = requests.get(self._database_url, headers=self._auth_header, json=json_data)
         user_exists = False
 
         if request.status_code == 401:
             self._token = self._login()
-            request = requests.get(self._database_url, headers=headers, json=data)
+            request = requests.get(self._database_url, headers=self._auth_header, json=data)
 
             if request.status_code == 200:
                 data = request.json()
@@ -56,16 +55,12 @@ class Database:
             'path': 'devtasks/tasks/'
         }
 
-        headers = {
-            'Authorization': f'Bearer {self._token}'
-        }
-
-        request = requests.get(self._database_url, headers=headers, json=data)
+        request = requests.get(self._database_url, headers=self._auth_header, json=data)
         tasks = {}
 
         if request.status_code == 401:
             self._token = self._login()
-            request = requests.get(self._database_url, headers=headers, json=data)
+            request = requests.get(self._database_url, headers=self._auth_header, json=data)
 
             if request.status_code == 200:
                 data = request.json()
