@@ -20,7 +20,7 @@ def register(request):
     data = request.json()
 
     if not data or not data.get('email') or not data.get('password'):
-        return {'status': 'error', 'message': 'Invalid login JSON'}, 400
+        return {'status': 'error', 'message': 'Invalid register JSON'}, 400
 
     email = data.get('email')
     password = data.get('password')
