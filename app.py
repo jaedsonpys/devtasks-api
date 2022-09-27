@@ -1,13 +1,14 @@
 from pysgi import PySGI
-from database import Database
+from cookiedb import CookieDB
 
 app = PySGI()
-db = Database()
+db = CookieDB()
 
 
 @app.route('/')
 def index():
     return 'Hello world!'
+
 
 if __name__ == '__main__':
     import os
