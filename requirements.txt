@@ -1,3 +1,5 @@
+argeasy==2.0.1
+bupytest==1.0.3
 certifi==2022.9.14
 cffi==1.15.1
 charset-normalizer==2.1.1
