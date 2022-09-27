@@ -54,7 +54,7 @@ class Database:
         return user_exists
 
     def register_user(self, email: str, password: str) -> None:
-        user_exists = self.check_user_exists()
+        user_exists = self.check_user_exists(email)
 
         if not user_exists:
             hashed_pw = hashlib.sha256(password.encode()).hexdigest()
