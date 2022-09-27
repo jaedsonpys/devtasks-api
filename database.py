@@ -1,6 +1,9 @@
 import os
+import hashlib
 
 import requests
+
+import exceptions
 
 
 class Database:
@@ -49,6 +52,24 @@ class Database:
                 user_exists = True
 
         return user_exists
+
+    def register_user(self, email: str, password: str) -> None:
+        user_exists = self.check_user_exists()
+
+        if not user_exists:
+            hashed_pw = hashlib.sha256(password.encode()).hexdigest()
+
+            data = {
+                'path': f'devtasks/users/{email}',
+                'item': {
+                    'email': email,
+                    'password': hashed_pw
+                }
+            }
+
+            requests.post(self._database_url, headers=self._auth_header, json=data)
+        else:
+            raise exceptions.UserExistsError('User already exists')
 
     def get_tasks(self) -> dict:
         data = {
