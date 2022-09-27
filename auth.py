@@ -3,6 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 
 import utoken
+from utoken import exceptions as u_exception
 
 
 class UserAuth:
@@ -15,3 +16,12 @@ class UserAuth:
 
         auth_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
         return auth_token
+
+    def has_valid_token(self, token: str) -> bool:
+        try:
+            utoken.decode(token, self._get_utoken_key())
+        except (u_exception.ExpiredTokenError, u_exception.InvalidKeyError,
+                u_exception.InvalidTokenError, u_exception.InvalidContentTokenError):
+            return False
+        else:
+            return True
