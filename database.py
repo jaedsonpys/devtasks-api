@@ -16,7 +16,7 @@ class Database:
 
     def _login(self) -> None:
         database_pw = os.environ.get('DATABASE_PW')
-        request = requests.get(self._cookiedb_api + '/login', params={'password': database_pw})
+        request = requests.post(self._cookiedb_api + '/login', params={'password': database_pw})
 
         if request.status_code == 401:
             raise ConnectionError('Invalid database API password')
