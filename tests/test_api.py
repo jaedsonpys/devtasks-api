@@ -88,6 +88,27 @@ class TestAPI(bupytest.UnitTest):
         self.assert_expected(result.get('status'), 'success')
         self.assert_expected(result.get('message'), 'Task added')
 
+    def test_get_tasks(self):
+        headers = {'Authorization': f'Bearer {self._token}'}
+
+        request = requests.get(self._tasks_url, headers=headers)
+        self.assert_expected(request.status_code, 200)
+
+        result = request.json()
+        self.assert_expected(len(result), 2)
+
+        task_1 = result[0]
+
+        self.assert_expected(task_1.get('name'), 'programming in python')
+        self.assert_expected(task_1.get('status'), 'incomplete')
+        self.assert_true(task_1.get('id'))
+
+        task_2 = result[1]
+
+        self.assert_expected(task_2.get('name'), 'work in devtasks')
+        self.assert_expected(task_2.get('status'), 'incomplete')
+        self.assert_true(task_2.get('id'))
+
 
 if __name__ == '__main__':
     bupytest.this()
