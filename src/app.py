@@ -1,5 +1,6 @@
 import hashlib
 import os
+import random
 
 from cookiedb import CookieDB
 from pysgi import PySGI
@@ -65,11 +66,9 @@ def login(request):
 
     if user_data:
         original_pw = user_data.get('password')
-
-        hashed_original_pw = hashlib.sha256(original_pw.encode()).hexdigest()
         hashed_pw = hashlib.sha256(password.encode()).hexdigest()
 
-        if hashed_original_pw == hashed_pw:
+        if original_pw == hashed_pw:
             auth_token = user_auth.create_user_token(email)
 
             login_data = {
