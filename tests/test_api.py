@@ -1,5 +1,3 @@
-import os
-
 import bupytest
 import requests
 
@@ -12,6 +10,8 @@ class TestAPI(bupytest.UnitTest):
         
         self._login_url = f'{base_url}/login'
         self._register_url = f'{base_url}/register'
+        self._tasks_url = f'{base_url}/tasks'
+
         self._user_email = 'user@mail.com'
         self._user_password = 'secret-password'
 
@@ -63,6 +63,30 @@ class TestAPI(bupytest.UnitTest):
         self.assert_true(result.get('token'))
 
         self._token = result.get('token')
+
+    def test_add_tasks(self):
+        task_data = {'task_name': 'programming in python'}
+        headers = {'Authorization': f'Bearer {self._token}'}
+
+        request = requests.post(self._tasks_url, json=task_data, headers=headers)
+        self.assert_expected(request.status_code, 201)
+
+        result = request.json()
+
+        self.assert_expected(result.get('status'), 'success')
+        self.assert_expected(result.get('message'), 'Task added')
+
+    def test_add_tasks_2(self):
+        task_data = {'task_name': 'work in devtasks'}
+        headers = {'Authorization': f'Bearer {self._token}'}
+
+        request = requests.post(self._tasks_url, json=task_data, headers=headers)
+        self.assert_expected(request.status_code, 201)
+
+        result = request.json()
+
+        self.assert_expected(result.get('status'), 'success')
+        self.assert_expected(result.get('message'), 'Task added')
 
 
 if __name__ == '__main__':
