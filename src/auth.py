@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from functools import wraps
+from typing import Union
 
 import utoken
 from utoken import exceptions as u_exception
@@ -17,18 +18,18 @@ class UserAuth:
         auth_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
         return auth_token
 
-    def has_valid_token(self, token: str) -> bool:
+    def has_valid_token(self, token: str) -> Union[bool, dict]:
         try:
-            utoken.decode(token, self._get_utoken_key())
+            payload = utoken.decode(token, self._get_utoken_key())
         except (u_exception.ExpiredTokenError, u_exception.InvalidKeyError,
                 u_exception.InvalidTokenError, u_exception.InvalidContentTokenError):
             return False
         else:
-            return True
+            return payload
 
     def auth_required(self, func):
         @wraps(func)
-        def decorator(request, *args, **kwargs):
+        def decorator(request):
             authorization = request.headers.get('Authorization')
 
             if not authorization:
@@ -37,10 +38,11 @@ class UserAuth:
             auth_type, token = authorization.split(' ')
 
             if auth_type == 'Bearer':
-                if not self.has_valid_token(token):
+                valid_token = self.has_valid_token(token)
+                if not valid_token:
                     response = {'status': 'error', 'message': 'Invalid auth token'}, 401
                 else:
-                    response = func(request, *args, **kwargs)
+                    response = func(request, valid_token)
 
                 return response
             else:
