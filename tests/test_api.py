@@ -64,7 +64,7 @@ class TestAPI(bupytest.UnitTest):
 
         self._token = result.get('token')
 
-    def test_add_tasks(self):
+    def test_add_task(self):
         task_data = {'task_name': 'programming in python'}
         headers = {'Authorization': f'Bearer {self._token}'}
 
@@ -76,7 +76,7 @@ class TestAPI(bupytest.UnitTest):
         self.assert_expected(result.get('status'), 'success')
         self.assert_expected(result.get('message'), 'Task added')
 
-    def test_add_tasks_2(self):
+    def test_add_task_2(self):
         task_data = {'task_name': 'work in devtasks'}
         headers = {'Authorization': f'Bearer {self._token}'}
 
