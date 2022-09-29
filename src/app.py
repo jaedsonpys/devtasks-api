@@ -86,6 +86,38 @@ def login(request):
     return response
 
 
+@app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@user_auth.auth_required
+def tasks(request, user_payload):
+    if request.method == 'POST':
+        task_data = request.json()
+
+        if not task_data or not task_data.get('task_name'):
+            return {'status': 'error', 'message': 'Invalid task data'}, 400
+
+        # getting task data
+        task_name = task_data.get('task_name')
+        task_id = random.randint(100000, 999999)
+        task_status = 'incomplete'
+
+        new_task = {
+            'name': task_name,
+            'id': task_id,
+            'status': task_status
+        }
+
+        user_email = user_payload['email']
+
+        tasks_list = db.get(f'users/{user_email}/tasks') or []
+        tasks_list.append(new_task)
+
+        db.add(f'users/{user_email}/tasks', tasks_list)
+
+        response = {'status': 'success', 'message': 'Task added'}, 201
+
+    return response
+
+
 if __name__ == '__main__':
     import os
 
