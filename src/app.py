@@ -89,7 +89,12 @@ def login(request):
 @app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @user_auth.auth_required
 def tasks(request, user_payload):
-    if request.method == 'POST':
+    user_email = user_payload['email']
+
+    if request.method == 'GET':
+        tasks_list = db.get(f'users/{user_email}/tasks') or []
+        response = tasks_list, 200
+    elif request.method == 'POST':
         task_data = request.json()
 
         if not task_data or not task_data.get('task_name'):
@@ -105,8 +110,6 @@ def tasks(request, user_payload):
             'id': task_id,
             'status': task_status
         }
-
-        user_email = user_payload['email']
 
         tasks_list = db.get(f'users/{user_email}/tasks') or []
         tasks_list.append(new_task)
