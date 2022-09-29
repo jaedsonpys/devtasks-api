@@ -117,6 +117,35 @@ def tasks(request, user_payload):
         db.add(f'users/{user_email}/tasks', tasks_list)
 
         response = {'status': 'success', 'message': 'Task added'}, 201
+    elif request.method == 'PUT':
+        task_data = request.json()
+
+        if not task_data or not task_data.get('task_status') or not task_data.get('task_id'):
+            return {'status': 'error', 'message': 'Invalid task data'}, 400
+
+        task_status = task_data.get('task_status')
+        task_id = task_data.get('task_id')
+        updated_task = None
+
+        tasks_list = db.get(f'users/{user_email}/tasks') or []
+
+        for index, task in enumerate(tasks_list):
+            if task['id'] == task_id:
+                updated_task = {
+                    'name': task['name'],
+                    'id': task_id,
+                    'status': task_status
+                }
+
+                tasks_list.pop(index)
+                break
+
+        if updated_task:
+            tasks_list.append(updated_task)
+            db.add(f'users/{user_email}/tasks', tasks_list)
+            response = {'status': 'success', 'message': 'Task updated'}, 201
+        else:
+            response = {'status': 'error', 'message': 'Task ID not found'}, 404
 
     return response
 
