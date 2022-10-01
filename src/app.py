@@ -149,7 +149,7 @@ def tasks(request, user_payload):
     elif request.method == 'DELETE':
         task_data = request.json()
 
-        if not task_data or not task_data.get('task_status') or not task_data.get('task_id'):
+        if not task_data or not task_data.get('task_id'):
             return {'status': 'error', 'message': 'Invalid task data'}, 400
 
         task_id = task_data.get('task_id')
