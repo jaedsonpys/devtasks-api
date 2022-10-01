@@ -8,3 +8,12 @@ To run the API, you only need to execute one command, but first, make sure you a
 
 - `UTOKEN_KEY`: Utoken key;
 - `PORT`: PySGI port (to production).
+
+## Routes
+
+- `/api/register` (POST): Register new user;
+- `/api/login` (POST): Login user;
+
+- `/api/tasks` (POST): Create new task;
+- `/api/tasks` (PUT): Update a task;
+- `/api/tasks` (GET): Get a task list.
