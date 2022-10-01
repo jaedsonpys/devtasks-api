@@ -116,7 +116,7 @@ def tasks(request, user_payload):
 
         db.add(f'users/{user_email}/tasks', tasks_list)
 
-        response = {'status': 'success', 'message': 'Task added'}, 201
+        response = new_task, 201
     elif request.method == 'PUT':
         task_data = request.json()
 
@@ -143,7 +143,7 @@ def tasks(request, user_payload):
         if updated_task:
             tasks_list.append(updated_task)
             db.add(f'users/{user_email}/tasks', tasks_list)
-            response = {'status': 'success', 'message': 'Task updated'}, 201
+            response = updated_task, 201
         else:
             response = {'status': 'error', 'message': 'Task ID not found'}, 404
 
