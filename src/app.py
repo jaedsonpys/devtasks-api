@@ -146,6 +146,27 @@ def tasks(request, user_payload):
             response = updated_task, 201
         else:
             response = {'status': 'error', 'message': 'Task ID not found'}, 404
+    elif request.method == 'DELETE':
+        task_data = request.json()
+
+        if not task_data or not task_data.get('task_status') or not task_data.get('task_id'):
+            return {'status': 'error', 'message': 'Invalid task data'}, 400
+
+        task_id = task_data.get('task_id')
+        deleted_task = None
+
+        tasks_list = db.get(f'users/{user_email}/tasks') or []
+
+        for index, task in enumerate(tasks_list):
+            if task['id'] == task_id:
+                deleted_task = tasks_list.pop(index)
+                break
+
+        if deleted_task:
+            db.add(f'users/{user_email}/tasks', tasks_list)
+            response = {'status': 'success', 'message': f'Task #{task_id} deleted'}, 200
+        else:
+            response = {'status': 'error', 'message': 'Task ID not found'}, 404
 
     return response
 
