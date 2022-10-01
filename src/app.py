@@ -173,6 +173,11 @@ def tasks(request, user_payload):
 
 if __name__ == '__main__':
     import os
-
+    
+    key = os.environ.get('UTOKEN_KEY', 'secret-key')
     port = os.environ.get('PORT', 5500)
+
+    if key == 'secret-key':
+        print('\033[1;31mWARNING: PLEASE DEFINE A REAL SECRET KEY!\033[m')
+
     app.run(port=port)
