@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Union
 
 import utoken
+from flask import jsonify, request
 from utoken import exceptions as u_exception
 
 
@@ -29,23 +30,23 @@ class UserAuth:
 
     def auth_required(self, func):
         @wraps(func)
-        def decorator(request):
+        def decorator():
             authorization = request.headers.get('Authorization')
 
             if not authorization:
-                return {'status': 'error', 'message': 'Unauthorized'}, 401
+                return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
 
             auth_type, token = authorization.split(' ')
 
             if auth_type == 'Bearer':
                 valid_token = self.has_valid_token(token)
                 if not valid_token:
-                    response = {'status': 'error', 'message': 'Invalid auth token'}, 401
+                    response = jsonify({'status': 'error', 'message': 'Invalid auth token'}), 401
                 else:
-                    response = func(request, valid_token)
+                    response = func(valid_token)
 
                 return response
             else:
-                return {'status': 'error', 'message': 'Please use Bearer Token'}, 401
+                return jsonify({'status': 'error', 'message': 'Please use Bearer Token'}), 401
 
         return decorator
