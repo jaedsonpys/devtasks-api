@@ -3,11 +3,15 @@ import os
 import random
 
 from cookiedb import CookieDB
-from pysgi import PySGI
+from flask import Flask, jsonify, request
 
 from auth import UserAuth
 
-app = PySGI()
+SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = SECRET_KEY
+
 user_auth = UserAuth()
 db = CookieDB()
 
@@ -16,11 +20,11 @@ db.open('devtasks')
 
 
 @app.route('/api/register', methods=['POST'])
-def register(request):
-    data = request.json()
+def register():
+    data = request.json
 
     if not data or not data.get('email') or not data.get('password'):
-        return {'status': 'error', 'message': 'Invalid register JSON'}, 400
+        return jsonify({'status': 'error', 'message': 'Invalid register JSON'}), 400
 
     email = data.get('email')
     password = data.get('password')
@@ -45,19 +49,19 @@ def register(request):
             'token': auth_token
         }
 
-        response = register_data, 201
+        response = jsonify(register_data), 201
     else:
-        response = {'status': 'error', 'message': 'User already exists'}, 409
+        response = jsonify({'status': 'error', 'message': 'User already exists'}), 409
 
     return response
 
 
 @app.route('/api/login', methods=['POST'])
-def login(request):
-    data = request.json()
+def login():
+    data = request.json
 
     if not data or not data.get('email') or not data.get('password'):
-        return {'status': 'error', 'message': 'Invalid login JSON'}, 400
+        return jsonify({'status': 'error', 'message': 'Invalid login JSON'}), 400
 
     email = data.get('email')
     password = data.get('password')
@@ -77,28 +81,28 @@ def login(request):
                 'token': auth_token
             }
 
-            response = login_data, 201
+            response = jsonify(login_data), 201
         else:
-            response = {'status': 'error', 'message': 'Email or password incorrect'}, 401
+            response = jsonify({'status': 'error', 'message': 'Email or password incorrect'}), 401
     else:
-        response = {'status': 'error', 'message': 'Email or password incorrect'}, 401
+        response = jsonify({'status': 'error', 'message': 'Email or password incorrect'}), 401
 
     return response
 
 
 @app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @user_auth.auth_required
-def tasks(request, user_payload):
+def tasks(user_payload):
     user_email = user_payload['email']
 
     if request.method == 'GET':
         tasks_list = db.get(f'users/{user_email}/tasks') or []
-        response = tasks_list, 200
+        response = jsonify(tasks_list), 200
     elif request.method == 'POST':
-        task_data = request.json()
+        task_data = request.json
 
         if not task_data or not task_data.get('task_name'):
-            return {'status': 'error', 'message': 'Invalid task data'}, 400
+            return jsonify({'status': 'error', 'message': 'Invalid task data'}), 400
 
         # getting task data
         task_name = task_data.get('task_name')
@@ -116,12 +120,12 @@ def tasks(request, user_payload):
 
         db.add(f'users/{user_email}/tasks', tasks_list)
 
-        response = new_task, 201
+        response = jsonify(new_task), 201
     elif request.method == 'PUT':
-        task_data = request.json()
+        task_data = request.json
 
         if not task_data or not task_data.get('task_status') or not task_data.get('task_id'):
-            return {'status': 'error', 'message': 'Invalid task data'}, 400
+            return jsonify({'status': 'error', 'message': 'Invalid task data'}), 400
 
         task_status = task_data.get('task_status')
         task_id = task_data.get('task_id')
@@ -143,14 +147,14 @@ def tasks(request, user_payload):
         if updated_task:
             tasks_list.append(updated_task)
             db.add(f'users/{user_email}/tasks', tasks_list)
-            response = updated_task, 201
+            response = jsonify(updated_task), 201
         else:
-            response = {'status': 'error', 'message': 'Task ID not found'}, 404
+            response = jsonify({'status': 'error', 'message': 'Task ID not found'}), 404
     elif request.method == 'DELETE':
-        task_data = request.json()
+        task_data = request.json
 
         if not task_data or not task_data.get('task_id'):
-            return {'status': 'error', 'message': 'Invalid task data'}, 400
+            return jsonify({'status': 'error', 'message': 'Invalid task data'}), 400
 
         task_id = task_data.get('task_id')
         deleted_task = None
@@ -164,16 +168,14 @@ def tasks(request, user_payload):
 
         if deleted_task:
             db.add(f'users/{user_email}/tasks', tasks_list)
-            response = {'status': 'success', 'message': f'Task #{task_id} deleted'}, 200
+            response = jsonify({'status': 'success', 'message': f'Task #{task_id} deleted'}), 200
         else:
-            response = {'status': 'error', 'message': 'Task ID not found'}, 404
+            response = jsonify({'status': 'error', 'message': 'Task ID not found'}), 404
 
     return response
 
 
 if __name__ == '__main__':
-    import os
-    
     key = os.environ.get('UTOKEN_KEY', 'secret-key')
     port = os.environ.get('PORT', 5500)
 
