@@ -6,6 +6,9 @@ from cookiedb import CookieDB
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 from auth import UserAuth
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
@@ -15,6 +18,13 @@ cors = CORS(app)
 
 app.config['SECRET_KEY'] = SECRET_KEY
 
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://",
+)
+
 user_auth = UserAuth()
 db = CookieDB()
 
@@ -23,6 +33,7 @@ db.open('devtasks')
 
 
 @app.route('/api/register', methods=['POST'])
+@limiter.limit('3 per day')
 def register():
     data = request.json
 
@@ -60,6 +71,7 @@ def register():
 
 
 @app.route('/api/login', methods=['POST'])
+@limiter.limit('1 per second')
 def login():
     data = request.json
 
@@ -94,6 +106,7 @@ def login():
 
 
 @app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@limiter.limit('5 per second')
 @user_auth.auth_required
 def tasks(user_payload):
     user_email = user_payload['email']
