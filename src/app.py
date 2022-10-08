@@ -4,12 +4,15 @@ import random
 
 from cookiedb import CookieDB
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 from auth import UserAuth
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
 
 app = Flask(__name__)
+cors = CORS(app)
+
 app.config['SECRET_KEY'] = SECRET_KEY
 
 user_auth = UserAuth()
