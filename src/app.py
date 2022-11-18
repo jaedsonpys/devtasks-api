@@ -106,6 +106,7 @@ def login():
 
 
 @app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@limiter.exempt
 @user_auth.auth_required
 def tasks(user_payload):
     user_email = user_payload['email']
