@@ -106,7 +106,6 @@ def login():
 
 
 @app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@limiter.limit('5 per second')
 @user_auth.auth_required
 def tasks(user_payload):
     user_email = user_payload['email']
