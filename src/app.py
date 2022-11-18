@@ -197,4 +197,4 @@ if __name__ == '__main__':
     if key == 'secret-key':
         print('\033[1;31mWARNING: PLEASE DEFINE A REAL SECRET KEY!\033[m')
 
-    app.run(port=port)
+    app.run(host='0.0.0.0', port=port)
