@@ -5,7 +5,6 @@ import random
 from cookiedb import CookieDB
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
