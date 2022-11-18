@@ -7,6 +7,8 @@ API for using the **DevTasks** application, developed using the [Flask](https://
 To run the API, you only need to execute one command, but first, make sure you add the **necessary environment variables**:
 
 - `UTOKEN_KEY`: Utoken key;
+- `SECRET_KEY`: Flask secret key;
+- `DATABASE_KEY`: Database secret key;
 - `PORT`: Server port (to production).
 
 ## Routes
