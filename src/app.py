@@ -11,6 +11,7 @@ from flask_limiter.util import get_remote_address
 from auth import UserAuth
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
+DATABASE_KEY = os.environ.get('DATABASE_KEY')
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -25,7 +26,7 @@ limiter = Limiter(
 )
 
 user_auth = UserAuth()
-db = CookieDB()
+db = CookieDB(key=DATABASE_KEY)
 
 db.create_database('devtasks', if_not_exists=True)
 db.open('devtasks')
