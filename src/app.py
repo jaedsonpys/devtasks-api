@@ -18,12 +18,12 @@ cors = CORS(app)
 
 app.config['SECRET_KEY'] = SECRET_KEY
 
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://",
-)
+# limiter = Limiter(
+#     app=app,
+#     key_func=get_remote_address,
+#     default_limits=["200 per day", "50 per hour"],
+#     storage_uri="memory://",
+# )
 
 user_auth = UserAuth()
 db = CookieDB(key=DATABASE_KEY)
@@ -33,7 +33,7 @@ db.open('devtasks')
 
 
 @app.route('/api/register', methods=['POST'])
-@limiter.limit('3 per day')
+# @limiter.limit('3 per day')
 def register():
     data = request.json
 
@@ -71,7 +71,7 @@ def register():
 
 
 @app.route('/api/login', methods=['POST'])
-@limiter.limit('1 per second')
+# @limiter.limit('1 per second')
 def login():
     data = request.json
 
@@ -106,7 +106,7 @@ def login():
 
 
 @app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@limiter.exempt
+# @limiter.exempt
 @user_auth.auth_required
 def tasks(user_payload):
     user_email = user_payload['email']
