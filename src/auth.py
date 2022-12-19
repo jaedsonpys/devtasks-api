@@ -12,7 +12,7 @@ class UserAuth:
     def _get_utoken_key(self) -> str:
         return os.environ.get('UTOKEN_KEY', 'secret-key')
 
-    def create_user_token(self, email: str) -> str:
+    def generate_user_token(self, email: str) -> str:
         utoken_key = self._get_utoken_key()
         token_exp = datetime.now() + timedelta(days=1)
 
