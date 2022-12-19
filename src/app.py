@@ -102,7 +102,7 @@ def login():
 @app.route('/api/refresh', methods=['POST'])
 def refresh():
     refresh_token = request.cookies.get('rftk')
-    payload = user_auth.has_valid_token(refresh_token)
+    payload = user_auth.has_valid_refresh_token(refresh_token)
 
     if payload:
         auth_token = user_auth.generate_user_token(payload['email'])
