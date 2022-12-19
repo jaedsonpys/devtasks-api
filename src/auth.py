@@ -21,7 +21,8 @@ class UserAuth:
 
     def generate_refresh_token(self, email: str) -> str:
         utoken_key = self._get_utoken_key()
-        refresh_token = utoken.encode({'email': email}, utoken_key)
+        token_exp = datetime.now() + timedelta(days=10)
+        refresh_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
         return refresh_token
 
     def has_valid_token(self, token: str) -> Union[bool, dict]:
