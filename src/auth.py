@@ -37,6 +37,15 @@ class UserAuth:
         else:
             return payload
 
+    def has_valid_refresh_token(self, token: str) -> Union[bool, dict]:
+        try:
+            payload = utoken.decode(token, self._get_refresh_key())
+        except (u_exception.ExpiredTokenError, u_exception.InvalidKeyError,
+                u_exception.InvalidTokenError, u_exception.InvalidContentTokenError):
+            return False
+        else:
+            return payload
+
     def auth_required(self, func):
         @wraps(func)
         def decorator():
