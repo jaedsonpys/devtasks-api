@@ -28,9 +28,9 @@ class UserAuth:
         refresh_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
         return refresh_token
 
-    def has_valid_token(self, token: str) -> Union[bool, dict]:
+    def has_valid_user_token(self, token: str) -> Union[bool, dict]:
         try:
-            payload = utoken.decode(token, self._get_utoken_key())
+            payload = utoken.decode(token, self._get_user_key())
         except (u_exception.ExpiredTokenError, u_exception.InvalidKeyError,
                 u_exception.InvalidTokenError, u_exception.InvalidContentTokenError):
             return False
