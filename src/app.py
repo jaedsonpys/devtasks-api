@@ -37,7 +37,7 @@ def register():
 
     if not user_exists:
         hashed_pw = hashlib.sha256(password.encode()).hexdigest()
-        auth_token = user_auth.create_user_token(email)
+        auth_token = user_auth.generate_user_token(email)
 
         db.add(
             path=f'users/{email}',
@@ -77,7 +77,7 @@ def login():
         hashed_pw = hashlib.sha256(password.encode()).hexdigest()
 
         if original_pw == hashed_pw:
-            auth_token = user_auth.create_user_token(email)
+            auth_token = user_auth.generate_user_token(email)
 
             login_data = {
                 'status': 'success',
