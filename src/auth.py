@@ -57,7 +57,7 @@ class UserAuth:
             auth_type, token = authorization.split(' ')
 
             if auth_type == 'Bearer':
-                valid_token = self.has_valid_token(token)
+                valid_token = self.has_valid_user_token(token)
                 if not valid_token:
                     response = jsonify({'status': 'error', 'message': 'Invalid auth token'}), 401
                 else:
