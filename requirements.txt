@@ -10,7 +10,6 @@ cryptography==38.0.3
 Deprecated==1.2.13
 Flask==2.2.2
 Flask-Cors==3.0.10
-http-pyparser==0.3.2
 idna==3.4
 importlib-metadata==5.0.0
 itsdangerous==2.1.2
