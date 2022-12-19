@@ -106,9 +106,11 @@ def refresh():
 
     if payload:
         auth_token = user_auth.generate_user_token(payload['email'])
-        return {'token': auth_token}
+        response = {'token': auth_token}
     else:
-        return {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
+        response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
+
+    return response
 
 
 @app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
