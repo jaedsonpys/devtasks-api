@@ -81,6 +81,7 @@ def login():
 
         if original_pw == hashed_pw:
             auth_token = user_auth.generate_user_token(email)
+            refresh_token = user_auth.generate_refresh_token(email)
 
             login_data = {
                 'status': 'success',
@@ -88,7 +89,8 @@ def login():
                 'token': auth_token
             }
 
-            response = jsonify(login_data), 201
+            response = Response(jsonify(login_data), status=201)
+            response.set_cookie('rftk', refresh_token, httponly=True)
         else:
             response = jsonify({'status': 'error', 'message': 'Email or password incorrect'}), 401
     else:
