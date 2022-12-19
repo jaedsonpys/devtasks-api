@@ -19,6 +19,11 @@ class UserAuth:
         auth_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
         return auth_token
 
+    def generate_refresh_token(self, email: str) -> str:
+        utoken_key = self._get_utoken_key()
+        refresh_token = utoken.encode({'email': email}, utoken_key)
+        return refresh_token
+
     def has_valid_token(self, token: str) -> Union[bool, dict]:
         try:
             payload = utoken.decode(token, self._get_utoken_key())
