@@ -9,18 +9,21 @@ from utoken import exceptions as u_exception
 
 
 class UserAuth:
-    def _get_utoken_key(self) -> str:
-        return os.environ.get('UTOKEN_KEY', 'secret-key')
+    def _get_user_key(self) -> str:
+        return os.environ.get('USER_TOKEN_KEY', 'user-token-key')
+
+    def _get_refresh_key(self) -> str:
+        return os.environ.get('REFRESHS_TOKEN_KEY', 'refresh-token-key')
 
     def generate_user_token(self, email: str) -> str:
-        utoken_key = self._get_utoken_key()
+        utoken_key = self._get_user_key()
         token_exp = datetime.now() + timedelta(minutes=5)
 
         auth_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
         return auth_token
 
     def generate_refresh_token(self, email: str) -> str:
-        utoken_key = self._get_utoken_key()
+        utoken_key = self._get_refresh_key()
         token_exp = datetime.now() + timedelta(days=10)
         refresh_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
         return refresh_token
