@@ -99,6 +99,18 @@ def login():
     return response
 
 
+@app.route('/api/refresh', methods=['POST'])
+def refresh():
+    refresh_token = request.cookies.get('rftk')
+    payload = user_auth.has_valid_token(refresh_token)
+
+    if payload:
+        auth_token = user_auth.generate_user_token(payload['email'])
+        return {'token': auth_token}
+    else:
+        return {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
+
+
 @app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @user_auth.auth_required
 def tasks(user_payload):
