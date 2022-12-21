@@ -4,7 +4,7 @@ import random
 
 from cookiedb import CookieDB
 from flask import Flask, jsonify, request
-from flask import Response
+from flask import Response, make_response
 from flask_cors import CORS
 
 from auth import UserAuth
@@ -55,7 +55,7 @@ def register():
             'token': auth_token
         }
 
-        response = Response(jsonify(register_data), status=201)
+        response = make_response(jsonify(register_data), 201)
         response.set_cookie('rftk', refresh_token, httponly=True)
     else:
         response = jsonify({'status': 'error', 'message': 'User already exists'}), 409
@@ -89,7 +89,7 @@ def login():
                 'token': auth_token
             }
 
-            response = Response(jsonify(login_data), status=201)
+            response = make_response(jsonify(login_data), 201)
             response.set_cookie('rftk', refresh_token, httponly=True)
         else:
             response = jsonify({'status': 'error', 'message': 'Email or password incorrect'}), 401
