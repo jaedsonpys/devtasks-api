@@ -106,9 +106,9 @@ def refresh():
 
     if payload:
         auth_token = user_auth.generate_user_token(payload['email'])
-        response = {'token': auth_token}
+        response = jsonify({'token': auth_token})
     else:
-        response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
+        response = jsonify({'status': 'error', 'message': 'Invalid Refresh Token'}), 406
 
     return response
 
