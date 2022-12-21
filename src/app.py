@@ -4,7 +4,7 @@ import random
 
 from cookiedb import CookieDB
 from flask import Flask, jsonify, request
-from flask import Response, make_response
+from flask import make_response
 from flask_cors import CORS
 
 from auth import UserAuth
