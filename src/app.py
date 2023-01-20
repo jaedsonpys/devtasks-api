@@ -2,7 +2,7 @@ import secrets
 
 import bcrypt
 from cookiedb import CookieDB
-from flask import Flask, after_this_request, jsonify, make_response, request
+from flask import Flask, after_this_request, jsonify, request
 from flask_cors import CORS
 from flask_restful import Api, Resource
 
@@ -43,7 +43,7 @@ class Register(Resource):
         data = request.json
 
         if not data or not data.get('email') or not data.get('password'):
-            return jsonify({'status': 'error', 'message': 'Invalid register JSON'}), 400
+            return {'status': 'error', 'message': 'Invalid register JSON'}, 400
 
         email = data.get('email')
         password = data.get('password')
@@ -67,7 +67,7 @@ class Register(Resource):
                 'token': auth_token
             }, 201
         else:
-            response = jsonify({'status': 'error', 'message': 'User already exists'}), 409
+            response = {'status': 'error', 'message': 'User already exists'}, 409
 
         return response
 
@@ -77,7 +77,7 @@ class Login(Resource):
         data = request.json
 
         if not data or not data.get('email') or not data.get('password'):
-            return jsonify({'status': 'error', 'message': 'Invalid login JSON'}), 400
+            return {'status': 'error', 'message': 'Invalid login JSON'}, 400
 
         email = data.get('email')
         password = data.get('password')
