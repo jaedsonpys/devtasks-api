@@ -209,5 +209,11 @@ class Tasks(Resource):
         return response
 
 
+# register resources
+api.add_resource(Login, '/login')
+api.add_resource(Register, '/register')
+api.add_resource(Refresh, '/refreshToken')
+api.add_resource(Tasks, '/tasks')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=SERVER_PORT)
