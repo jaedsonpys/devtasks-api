@@ -4,9 +4,11 @@ import bupytest
 import requests
 
 BASE_URL = 'http://127.0.0.1:5500/api'
+
 LOGIN_URL = BASE_URL + '/login'
 REFRESH_URL = BASE_URL + '/refreshToken'
 REGISTER_URL = BASE_URL + '/register'
+TASKS_URL = BASE_URL + '/tasks'
 
 
 class TestAPI(bupytest.UnitTest):
