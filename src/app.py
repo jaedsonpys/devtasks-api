@@ -1,16 +1,16 @@
 import hashlib
-import os
 import random
 
 from cookiedb import CookieDB
-from flask import Flask, jsonify, request
-from flask import make_response
+from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
 
 from auth import UserAuth
+from config import enviroment
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
-DATABASE_KEY = os.environ.get('DATABASE_KEY')
+SECRET_KEY = enviroment['SECRET_KEY', 'secret-key']
+DATABASE_KEY = enviroment['DATABASE_KEY']
+SERVER_PORT = enviroment['PORT']
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -199,10 +199,4 @@ def tasks(user_payload):
 
 
 if __name__ == '__main__':
-    key = os.environ.get('UTOKEN_KEY', 'secret-key')
-    port = os.environ.get('PORT', 5500)
-
-    if key == 'secret-key':
-        print('\033[1;31mWARNING: PLEASE DEFINE A REAL SECRET KEY!\033[m')
-
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=SERVER_PORT)
