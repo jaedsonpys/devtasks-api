@@ -25,6 +25,12 @@ db.create_database('devtasks', if_not_exists=True)
 db.open('devtasks')
 
 
+def revoke_token(*tokens: str):
+    blacklist = db.get('tokenBlacklist') or []
+    blacklist.extend(tokens)
+    db.add('tokenBlacklist', blacklist)
+
+
 def set_refresh_token_cookie(token: str):
     @after_this_request
     def set_cookie(response):
@@ -116,7 +122,11 @@ class Refresh(Resource):
             # generate a new access and refresh token
             access_token = auth.generate_access_token(payload['email'])
             refresh_token = auth.generate_access_token(payload['email'])
+
+            # revoke previous refresh token
+            revoke_token(refresh_token)
             set_refresh_token_cookie(refresh_token)
+
             response = {'token': access_token}
         else:
             response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
