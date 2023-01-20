@@ -113,7 +113,10 @@ class Refresh(Resource):
         payload = auth.has_valid_refresh_token(refresh_token)
 
         if payload:
+            # generate a new access and refresh token
             access_token = auth.generate_access_token(payload['email'])
+            refresh_token = auth.generate_access_token(payload['email'])
+            set_refresh_token_cookie(refresh_token)
             response = {'token': access_token}
         else:
             response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
