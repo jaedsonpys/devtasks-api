@@ -132,7 +132,7 @@ class Refresh(Resource):
             revoke_token(refresh_token)
             set_refresh_token_cookie(refresh_token)
 
-            response = {'token': access_token}
+            response = {'token': access_token}, 201
         else:
             response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
 
