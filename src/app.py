@@ -75,7 +75,7 @@ class Register(Resource):
 
 
 class Login(Resource):
-    def post():
+    def post(self):
         data = request.json
 
         if not data or not data.get('email') or not data.get('password'):
@@ -108,7 +108,7 @@ class Login(Resource):
 
 
 class Refresh(Resource):
-    def get():
+    def get(self):
         refresh_token = request.cookies.get('refreshToken')
         payload = user_auth.has_valid_refresh_token(refresh_token)
 
