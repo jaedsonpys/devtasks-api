@@ -16,7 +16,7 @@ SERVER_PORT = enviroment['SERVER_PORT']
 user_auth = UserAuth()
 app = Flask(__name__)
 cors = CORS(app)
-api = Api(app)
+api = Api(app, prefix='/api')
 
 app.config['SECRET_KEY'] = SECRET_KEY
 
