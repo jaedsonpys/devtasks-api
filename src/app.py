@@ -6,17 +6,17 @@ from flask import Flask, after_this_request, request
 from flask_cors import CORS
 from flask_restful import Api, Resource
 
-from auth import UserAuth
+from auth import Auth
 from config import enviroment
 
 SECRET_KEY = enviroment['SECRET_KEY']
 DATABASE_KEY = enviroment['DATABASE_KEY']
 SERVER_PORT = enviroment['SERVER_PORT']
 
-user_auth = UserAuth()
 app = Flask(__name__)
 cors = CORS(app)
 api = Api(app, prefix='/api')
+auth = Auth()
 
 app.config['SECRET_KEY'] = SECRET_KEY
 
@@ -54,8 +54,8 @@ class Register(Resource):
         if not user_exists:
             salt = bcrypt.gensalt()
             hashed_pw = bcrypt.hashpw(password.encode(), salt).decode()
-            auth_token = user_auth.generate_user_token(email)
-            refresh_token = user_auth.generate_refresh_token(email)
+            access_token = auth.generate_access_token(email)
+            refresh_token = auth.generate_refresh_token(email)
             set_refresh_token_cookie(refresh_token)
 
             db.add(path=f'users/{email}', value={
@@ -66,7 +66,7 @@ class Register(Resource):
             response = {
                 'status': 'success',
                 'message': 'Account created',
-                'token': auth_token
+                'token': access_token
             }, 201
         else:
             response = {'status': 'error', 'message': 'User already exists'}, 409
@@ -90,14 +90,14 @@ class Login(Resource):
             has_valid_pw = bcrypt.checkpw(password.encode(), original_pw.encode())
 
             if has_valid_pw:
-                auth_token = user_auth.generate_user_token(email)
-                refresh_token = user_auth.generate_refresh_token(email)
+                access_token = auth.generate_access_token(email)
+                refresh_token = auth.generate_refresh_token(email)
                 set_refresh_token_cookie(refresh_token)
 
                 response = {
                     'status': 'success',
                     'message': 'Login succesfully',
-                    'token': auth_token
+                    'token': access_token
                 }, 201
             else:
                 response = {'status': 'error', 'message': 'Email or password incorrect'}, 401
@@ -110,11 +110,11 @@ class Login(Resource):
 class Refresh(Resource):
     def get(self):
         refresh_token = request.cookies.get('refreshToken')
-        payload = user_auth.has_valid_refresh_token(refresh_token)
+        payload = auth.has_valid_refresh_token(refresh_token)
 
         if payload:
-            auth_token = user_auth.generate_user_token(payload['email'])
-            response = {'token': auth_token}
+            access_token = auth.generate_access_token(payload['email'])
+            response = {'token': access_token}
         else:
             response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
 
@@ -122,7 +122,7 @@ class Refresh(Resource):
 
 
 class Tasks(Resource):
-    method_decorators = [user_auth.auth_required]
+    method_decorators = [auth.auth_required]
 
     def get(self, user_payload: dict):
         user_email = user_payload['email']

@@ -16,7 +16,7 @@ ACCESS_TOKEN_KEY = enviroment['ACCESS_TOKEN_KEY']
 
 
 class Auth:
-    def generate_user_token(self, email: str) -> str:
+    def generate_access_token(self, email: str) -> str:
         token = utoken.encode(
             payload={'email': email},
             key=ACCESS_TOKEN_KEY,
