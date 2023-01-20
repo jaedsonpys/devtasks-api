@@ -45,6 +45,7 @@ class TestAPI(bupytest.UnitTest):
         data = response.json()
 
         self.assert_expected(data.get('status'), 'success')
+        self.assert_true(response.cookies.get('refreshToken'))
         self.assert_true(data.get('token'))
 
     def test_register_same_user(self):
