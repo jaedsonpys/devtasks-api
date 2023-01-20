@@ -1,4 +1,4 @@
-import random
+import secrets
 
 import bcrypt
 from cookiedb import CookieDB
@@ -136,7 +136,7 @@ def tasks(user_payload):
 
         # getting task data
         task_name = task_data.get('task_name')
-        task_id = random.randint(100000, 999999)
+        task_id = secrets.token_hex(4)
         task_status = 'incomplete'
 
         new_task = {
