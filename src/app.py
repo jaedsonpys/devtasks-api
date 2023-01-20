@@ -65,47 +65,44 @@ class Register(Resource):
                 'status': 'success',
                 'message': 'Account created',
                 'token': auth_token
-            }
+            }, 201
         else:
             response = jsonify({'status': 'error', 'message': 'User already exists'}), 409
 
         return response
 
 
-@app.route('/api/login', methods=['POST'])
-def login():
-    data = request.json
+class Login(Resource):
+    def post():
+        data = request.json
 
-    if not data or not data.get('email') or not data.get('password'):
-        return jsonify({'status': 'error', 'message': 'Invalid login JSON'}), 400
+        if not data or not data.get('email') or not data.get('password'):
+            return jsonify({'status': 'error', 'message': 'Invalid login JSON'}), 400
 
-    email = data.get('email')
-    password = data.get('password')
+        email = data.get('email')
+        password = data.get('password')
+        user_data = db.get(f'users/{email}')
 
-    user_data = db.get(f'users/{email}')
+        if user_data:
+            original_pw = user_data.get('password')
+            has_valid_pw = bcrypt.checkpw(password.encode(), original_pw.encode())
 
-    if user_data:
-        original_pw = user_data.get('password')
-        has_valid_pw = bcrypt.checkpw(password.encode(), original_pw.encode())
+            if has_valid_pw:
+                auth_token = user_auth.generate_user_token(email)
+                refresh_token = user_auth.generate_refresh_token(email)
+                set_refresh_token_cookie(refresh_token)
 
-        if has_valid_pw:
-            auth_token = user_auth.generate_user_token(email)
-            refresh_token = user_auth.generate_refresh_token(email)
-
-            login_data = {
-                'status': 'success',
-                'message': 'Login succesfully',
-                'token': auth_token
-            }
-
-            response = make_response(jsonify(login_data), 201)
-            response.set_cookie('rftk', refresh_token, httponly=True)
+                response = {
+                    'status': 'success',
+                    'message': 'Login succesfully',
+                    'token': auth_token
+                }, 201
+            else:
+                response = {'status': 'error', 'message': 'Email or password incorrect'}, 401
         else:
-            response = jsonify({'status': 'error', 'message': 'Email or password incorrect'}), 401
-    else:
-        response = jsonify({'status': 'error', 'message': 'Email or password incorrect'}), 401
+            response = {'status': 'error', 'message': 'Email or password incorrect'}, 401
 
-    return response
+        return response
 
 
 @app.route('/api/refresh', methods=['POST'])
