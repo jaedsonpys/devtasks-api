@@ -10,7 +10,7 @@ from config import enviroment
 
 SECRET_KEY = enviroment['SECRET_KEY']
 DATABASE_KEY = enviroment['DATABASE_KEY']
-SERVER_PORT = enviroment['PORT']
+SERVER_PORT = enviroment['SERVER_PORT']
 
 user_auth = UserAuth()
 app = Flask(__name__)
