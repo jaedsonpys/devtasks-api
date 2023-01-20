@@ -57,20 +57,23 @@ class UserAuth:
         def decorator():
             authorization = request.headers.get('Authorization')
 
-            if not authorization:
-                return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
-
-            auth_type, token = authorization.split(' ')
-
-            if auth_type == 'Bearer':
-                valid_token = self.has_valid_user_token(token)
-                if not valid_token:
-                    response = jsonify({'status': 'error', 'message': 'Invalid auth token'}), 401
+            if authorization:
+                try:
+                    auth_type, token = authorization.split(' ')
+                except ValueError:
+                    response = jsonify({'status': 'error', 'message': 'Please use Bearer Token'}), 401
                 else:
-                    response = func(valid_token)
-
-                return response
+                    if auth_type == 'Bearer':
+                        valid_token = self.has_valid_user_token(token)
+                        if not valid_token:
+                            response = jsonify({'status': 'error', 'message': 'Invalid auth token'}), 401
+                        else:
+                            response = func(valid_token)
+                    else:
+                        response = jsonify({'status': 'error', 'message': 'Please use Bearer Token'}), 401
             else:
-                return jsonify({'status': 'error', 'message': 'Please use Bearer Token'}), 401
+                response = jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
+            return response
 
         return decorator
