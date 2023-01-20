@@ -31,6 +31,11 @@ def revoke_token(*tokens: str):
     db.add('tokenBlacklist', blacklist)
 
 
+def token_in_blacklist(token: str):
+    blacklist = db.get('tokenBlacklist') or []
+    return token in blacklist
+
+
 def set_refresh_token_cookie(token: str):
     @after_this_request
     def set_cookie(response):
@@ -118,7 +123,7 @@ class Refresh(Resource):
         refresh_token = request.cookies.get('refreshToken')
         payload = auth.has_valid_refresh_token(refresh_token)
 
-        if payload:
+        if payload and not token_in_blacklist(refresh_token):
             # generate a new access and refresh token
             access_token = auth.generate_access_token(payload['email'])
             refresh_token = auth.generate_access_token(payload['email'])
