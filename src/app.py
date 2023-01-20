@@ -36,7 +36,8 @@ def register():
     user_exists = db.get(f'users/{email}')
 
     if not user_exists:
-        hashed_pw = bcrypt.hashpw(password.encode()).decode()
+        salt = bcrypt.gensalt()
+        hashed_pw = bcrypt.hashpw(password.encode(), salt).decode()
         auth_token = user_auth.generate_user_token(email)
         refresh_token = user_auth.generate_refresh_token(email)
 
