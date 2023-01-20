@@ -105,18 +105,18 @@ class Login(Resource):
         return response
 
 
-@app.route('/api/refresh', methods=['POST'])
-def refresh():
-    refresh_token = request.cookies.get('rftk')
-    payload = user_auth.has_valid_refresh_token(refresh_token)
+class Refresh(Resource):
+    def get():
+        refresh_token = request.cookies.get('refreshToken')
+        payload = user_auth.has_valid_refresh_token(refresh_token)
 
-    if payload:
-        auth_token = user_auth.generate_user_token(payload['email'])
-        response = jsonify({'token': auth_token})
-    else:
-        response = jsonify({'status': 'error', 'message': 'Invalid Refresh Token'}), 406
+        if payload:
+            auth_token = user_auth.generate_user_token(payload['email'])
+            response = {'token': auth_token}
+        else:
+            response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
 
-    return response
+        return response
 
 
 @app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
