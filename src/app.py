@@ -121,20 +121,24 @@ class Login(Resource):
 class Refresh(Resource):
     def get(self):
         refresh_token = request.cookies.get('refreshToken')
-        payload = auth.has_valid_refresh_token(refresh_token)
 
-        if payload and not token_in_blacklist(refresh_token):
-            # generate a new access and refresh token
-            access_token = auth.generate_access_token(payload['email'])
-            refresh_token = auth.generate_access_token(payload['email'])
+        if refresh_token:
+            payload = auth.has_valid_refresh_token(refresh_token)
 
-            # revoke previous refresh token
-            revoke_token(refresh_token)
-            set_refresh_token_cookie(refresh_token)
+            if payload and not token_in_blacklist(refresh_token):
+                # generate a new access and refresh token
+                access_token = auth.generate_access_token(payload['email'])
+                refresh_token = auth.generate_access_token(payload['email'])
 
-            response = {'token': access_token}, 201
+                # revoke previous refresh token
+                revoke_token(refresh_token)
+                set_refresh_token_cookie(refresh_token)
+
+                response = {'token': access_token}, 201
+            else:
+                response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
         else:
-            response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
+            response = {'status': 'error', 'message': 'Refresh token not available'}, 406
 
         return response
 
