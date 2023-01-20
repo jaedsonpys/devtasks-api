@@ -2,7 +2,7 @@ import secrets
 
 import bcrypt
 from cookiedb import CookieDB
-from flask import Flask, after_this_request, jsonify, request
+from flask import Flask, after_this_request, request
 from flask_cors import CORS
 from flask_restful import Api, Resource
 
