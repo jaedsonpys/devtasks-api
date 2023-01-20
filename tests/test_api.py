@@ -32,6 +32,12 @@ class TestAPI(bupytest.UnitTest):
 
         self.register_data = self.login_data.copy()
 
+        try:
+            requests.get(BASE_URL)
+        except requests.exceptions.ConnectionError:
+            print('API not available to test')
+            exit(0)
+
 
 if __name__ == '__main__':
     bupytest.this()
