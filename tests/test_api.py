@@ -38,6 +38,15 @@ class TestAPI(bupytest.UnitTest):
             print('API not available to test')
             exit(0)
 
+    def test_register(self):
+        response = requests.post(REGISTER_URL, json=self.register_data)
+        self.assert_expected(response.status_code, 201)
+
+        data = response.json()
+
+        self.assert_expected(data.get('status'), 'success')
+        self.assert_true(data.get('token'))
+
 
 if __name__ == '__main__':
     bupytest.this()
