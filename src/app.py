@@ -155,17 +155,17 @@ class Tasks(Resource):
         user_email = user_payload['email']
         task_data = request.json
 
-        if not task_data or not task_data.get('task_name'):
+        if not task_data or not task_data.get('name'):
             return {'status': 'error', 'message': 'Invalid task data'}, 400
 
         # getting task data
-        task_name = task_data.get('task_name')
+        task_name = task_data.get('name')
         task_id = secrets.token_hex(4)
         task_status = 'incomplete'
 
         new_task = {
-            'name': task_name,
             'id': task_id,
+            'name': task_name,
             'status': task_status
         }
 
