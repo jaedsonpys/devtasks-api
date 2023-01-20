@@ -8,18 +8,17 @@ from flask_cors import CORS
 from auth import UserAuth
 from config import enviroment
 
-SECRET_KEY = enviroment['SECRET_KEY', 'secret-key']
+SECRET_KEY = enviroment['SECRET_KEY']
 DATABASE_KEY = enviroment['DATABASE_KEY']
 SERVER_PORT = enviroment['PORT']
 
+user_auth = UserAuth()
 app = Flask(__name__)
 cors = CORS(app)
 
 app.config['SECRET_KEY'] = SECRET_KEY
 
-user_auth = UserAuth()
 db = CookieDB(key=DATABASE_KEY)
-
 db.create_database('devtasks', if_not_exists=True)
 db.open('devtasks')
 
