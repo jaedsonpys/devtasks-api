@@ -37,6 +37,8 @@ def set_refresh_token_cookie(token: str):
             secure=True
         )
 
+        return response
+
 
 class Register(Resource):
     def post(self):
