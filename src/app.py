@@ -119,19 +119,20 @@ class Refresh(Resource):
         return response
 
 
-@app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@user_auth.auth_required
-def tasks(user_payload):
-    user_email = user_payload['email']
+class Tasks(Resource):
+    method_decorators = [user_auth.auth_required]
 
-    if request.method == 'GET':
+    def get(self, user_payload: dict):
+        user_email = user_payload['email']
         tasks_list = db.get(f'users/{user_email}/tasks') or []
-        response = jsonify(tasks_list), 200
-    elif request.method == 'POST':
+        return tasks_list, 200
+
+    def post(self, user_payload: dict):
+        user_email = user_payload['email']
         task_data = request.json
 
         if not task_data or not task_data.get('task_name'):
-            return jsonify({'status': 'error', 'message': 'Invalid task data'}), 400
+            return {'status': 'error', 'message': 'Invalid task data'}, 400
 
         # getting task data
         task_name = task_data.get('task_name')
@@ -146,15 +147,16 @@ def tasks(user_payload):
 
         tasks_list = db.get(f'users/{user_email}/tasks') or []
         tasks_list.append(new_task)
-
         db.add(f'users/{user_email}/tasks', tasks_list)
 
-        response = jsonify(new_task), 201
-    elif request.method == 'PUT':
+        return new_task, 201
+
+    def put(self, user_payload: dict):
+        user_email = user_payload['email']
         task_data = request.json
 
         if not task_data or not task_data.get('task_status') or not task_data.get('task_id'):
-            return jsonify({'status': 'error', 'message': 'Invalid task data'}), 400
+            return {'status': 'error', 'message': 'Invalid task data'}, 400
 
         task_status = task_data.get('task_status')
         task_id = task_data.get('task_id')
@@ -176,18 +178,21 @@ def tasks(user_payload):
         if updated_task:
             tasks_list.append(updated_task)
             db.add(f'users/{user_email}/tasks', tasks_list)
-            response = jsonify(updated_task), 201
+            response = updated_task, 201
         else:
-            response = jsonify({'status': 'error', 'message': 'Task ID not found'}), 404
-    elif request.method == 'DELETE':
+            response = {'status': 'error', 'message': 'Task ID not found'}, 404
+
+        return response
+
+    def delete(self, user_payload: dict):
+        user_email = user_payload['email']
         task_data = request.json
 
         if not task_data or not task_data.get('task_id'):
-            return jsonify({'status': 'error', 'message': 'Invalid task data'}), 400
+            return {'status': 'error', 'message': 'Invalid task data'}, 400
 
-        task_id = task_data.get('task_id')
         deleted_task = None
-
+        task_id = task_data.get('task_id')
         tasks_list = db.get(f'users/{user_email}/tasks') or []
 
         for index, task in enumerate(tasks_list):
@@ -197,11 +202,11 @@ def tasks(user_payload):
 
         if deleted_task:
             db.add(f'users/{user_email}/tasks', tasks_list)
-            response = jsonify({'status': 'success', 'message': f'Task #{task_id} deleted'}), 200
+            response = {'status': 'success', 'message': f'Task #{task_id} deleted'}, 200
         else:
-            response = jsonify({'status': 'error', 'message': 'Task ID not found'}), 404
+            response = {'status': 'error', 'message': 'Task ID not found'}, 404
 
-    return response
+        return response
 
 
 if __name__ == '__main__':
