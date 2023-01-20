@@ -1,6 +1,6 @@
-import hashlib
 import random
 
+import bcrypt
 from cookiedb import CookieDB
 from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
@@ -36,7 +36,7 @@ def register():
     user_exists = db.get(f'users/{email}')
 
     if not user_exists:
-        hashed_pw = hashlib.sha256(password.encode()).hexdigest()
+        hashed_pw = bcrypt.hashpw(password.encode()).decode()
         auth_token = user_auth.generate_user_token(email)
         refresh_token = user_auth.generate_refresh_token(email)
 
@@ -76,9 +76,9 @@ def login():
 
     if user_data:
         original_pw = user_data.get('password')
-        hashed_pw = hashlib.sha256(password.encode()).hexdigest()
+        has_valid_pw = bcrypt.checkpw(password.encode(), original_pw.encode())
 
-        if original_pw == hashed_pw:
+        if has_valid_pw:
             auth_token = user_auth.generate_user_token(email)
             refresh_token = user_auth.generate_refresh_token(email)
 
