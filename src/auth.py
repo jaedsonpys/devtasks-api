@@ -15,7 +15,7 @@ REFRESH_TOKEN_KEY = enviroment['REFRESH_TOKEN_KEY']
 ACCESS_TOKEN_KEY = enviroment['ACCESS_TOKEN_KEY']
 
 
-class UserAuth:
+class Auth:
     def generate_user_token(self, email: str) -> str:
         token = utoken.encode(
             payload={'email': email},
