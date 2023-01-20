@@ -107,6 +107,17 @@ class TestAPI(bupytest.UnitTest):
         self.access_token = access_token
         self.refresh_token = refresh_token
 
+    def test_add_task(self):
+        task = {'name': 'My Task'}
+        response = requests.post(TASKS_URL, json=task, headers=self._get_auth())
+        self.assert_expected(response.status_code, 201)
+
+        data = response.json()
+
+        self.assert_expected(data.get('name'), 'My Task')
+        self.assert_expected(data.get('status'), 'incomplete')
+        self.assert_true(data.get('id'))
+
 
 if __name__ == '__main__':
     bupytest.this()
