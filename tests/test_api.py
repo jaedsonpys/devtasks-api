@@ -73,6 +73,19 @@ class TestAPI(bupytest.UnitTest):
         self.assert_true(refresh_token)
         self.assert_true(access_token)
 
+    def test_login_with_incorrect_data(self):
+        response = requests.post(LOGIN_URL, json=self.incorrect_login_data)
+        self.assert_expected(response.status_code, 401)
+
+        data = response.json()
+
+        refresh_token = response.cookies.get('refreshToken')
+        access_token = data.get('token')
+
+        self.assert_expected(data.get('status'), 'error')
+        self.assert_false(refresh_token)
+        self.assert_false(access_token)
+
 
 if __name__ == '__main__':
     bupytest.this()
