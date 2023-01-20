@@ -47,6 +47,15 @@ class TestAPI(bupytest.UnitTest):
         self.assert_expected(data.get('status'), 'success')
         self.assert_true(data.get('token'))
 
+    def test_register_same_user(self):
+        response = requests.post(REGISTER_URL, json=self.register_data)
+        self.assert_expected(response.status_code, 409)
+
+        data = response.json()
+
+        self.assert_expected(data.get('status'), 'error')
+        self.assert_false(data.get('token'))
+
 
 if __name__ == '__main__':
     bupytest.this()
