@@ -1,5 +1,4 @@
-import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 from functools import wraps
 from typing import Union
 
@@ -7,30 +6,37 @@ import utoken
 from flask import jsonify, request
 from utoken import exceptions as u_exception
 
+from config import enviroment
+
+REFRESH_EXP_TIME = timedelta(days=30)
+ACCESS_EXP_TIME = timedelta(minutes=5)
+
+REFRESH_TOKEN_KEY = enviroment['REFRESH_TOKEN_KEY']
+ACCESS_TOKEN_KEY = enviroment['ACCESS_TOKEN_KEY']
+
 
 class UserAuth:
-    def _get_user_key(self) -> str:
-        return os.environ.get('USER_TOKEN_KEY', 'user-token-key')
-
-    def _get_refresh_key(self) -> str:
-        return os.environ.get('REFRESHS_TOKEN_KEY', 'refresh-token-key')
-
     def generate_user_token(self, email: str) -> str:
-        utoken_key = self._get_user_key()
-        token_exp = datetime.now() + timedelta(days=10)
+        token = utoken.encode(
+            payload={'email': email},
+            key=ACCESS_TOKEN_KEY,
+            expires_in=ACCESS_EXP_TIME
+        )
 
-        auth_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
-        return auth_token
+        return token
 
     def generate_refresh_token(self, email: str) -> str:
-        utoken_key = self._get_refresh_key()
-        token_exp = datetime.now() + timedelta(days=10)
-        refresh_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
-        return refresh_token
+        token = utoken.encode(
+            payload={'email': email},
+            key=REFRESH_TOKEN_KEY,
+            expires_in=REFRESH_EXP_TIME
+        )
+
+        return token
 
     def has_valid_user_token(self, token: str) -> Union[bool, dict]:
         try:
-            payload = utoken.decode(token, self._get_user_key())
+            payload = utoken.decode(token, ACCESS_TOKEN_KEY)
         except (u_exception.ExpiredTokenError, u_exception.InvalidKeyError,
                 u_exception.InvalidTokenError, u_exception.InvalidContentTokenError):
             return False
@@ -39,7 +45,7 @@ class UserAuth:
 
     def has_valid_refresh_token(self, token: str) -> Union[bool, dict]:
         try:
-            payload = utoken.decode(token, self._get_refresh_key())
+            payload = utoken.decode(token, REFRESH_TOKEN_KEY)
         except (u_exception.ExpiredTokenError, u_exception.InvalidKeyError,
                 u_exception.InvalidTokenError, u_exception.InvalidContentTokenError):
             return False
@@ -51,20 +57,23 @@ class UserAuth:
         def decorator():
             authorization = request.headers.get('Authorization')
 
-            if not authorization:
-                return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
-
-            auth_type, token = authorization.split(' ')
-
-            if auth_type == 'Bearer':
-                valid_token = self.has_valid_user_token(token)
-                if not valid_token:
-                    response = jsonify({'status': 'error', 'message': 'Invalid auth token'}), 401
+            if authorization:
+                try:
+                    auth_type, token = authorization.split(' ')
+                except ValueError:
+                    response = jsonify({'status': 'error', 'message': 'Please use Bearer Token'}), 401
                 else:
-                    response = func(valid_token)
-
-                return response
+                    if auth_type == 'Bearer':
+                        valid_token = self.has_valid_user_token(token)
+                        if not valid_token:
+                            response = jsonify({'status': 'error', 'message': 'Invalid auth token'}), 401
+                        else:
+                            response = func(valid_token)
+                    else:
+                        response = jsonify({'status': 'error', 'message': 'Please use Bearer Token'}), 401
             else:
-                return jsonify({'status': 'error', 'message': 'Please use Bearer Token'}), 401
+                response = jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
+            return response
 
         return decorator

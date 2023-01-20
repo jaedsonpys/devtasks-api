@@ -1,25 +1,24 @@
-import hashlib
-import os
-import random
+import secrets
 
+import bcrypt
 from cookiedb import CookieDB
-from flask import Flask, jsonify, request
-from flask import make_response
+from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
 
 from auth import UserAuth
+from config import enviroment
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
-DATABASE_KEY = os.environ.get('DATABASE_KEY')
+SECRET_KEY = enviroment['SECRET_KEY']
+DATABASE_KEY = enviroment['DATABASE_KEY']
+SERVER_PORT = enviroment['SERVER_PORT']
 
+user_auth = UserAuth()
 app = Flask(__name__)
 cors = CORS(app)
 
 app.config['SECRET_KEY'] = SECRET_KEY
 
-user_auth = UserAuth()
 db = CookieDB(key=DATABASE_KEY)
-
 db.create_database('devtasks', if_not_exists=True)
 db.open('devtasks')
 
@@ -37,7 +36,8 @@ def register():
     user_exists = db.get(f'users/{email}')
 
     if not user_exists:
-        hashed_pw = hashlib.sha256(password.encode()).hexdigest()
+        salt = bcrypt.gensalt()
+        hashed_pw = bcrypt.hashpw(password.encode(), salt).decode()
         auth_token = user_auth.generate_user_token(email)
         refresh_token = user_auth.generate_refresh_token(email)
 
@@ -56,7 +56,14 @@ def register():
         }
 
         response = make_response(jsonify(register_data), 201)
-        response.set_cookie('rftk', refresh_token, httponly=True)
+        response.set_cookie(
+            key='refreshToken', 
+            value=refresh_token,
+            samesite='Strict',
+            max_age=2592000,
+            httponly=True,
+            secure=True
+        )
     else:
         response = jsonify({'status': 'error', 'message': 'User already exists'}), 409
 
@@ -77,9 +84,9 @@ def login():
 
     if user_data:
         original_pw = user_data.get('password')
-        hashed_pw = hashlib.sha256(password.encode()).hexdigest()
+        has_valid_pw = bcrypt.checkpw(password.encode(), original_pw.encode())
 
-        if original_pw == hashed_pw:
+        if has_valid_pw:
             auth_token = user_auth.generate_user_token(email)
             refresh_token = user_auth.generate_refresh_token(email)
 
@@ -129,7 +136,7 @@ def tasks(user_payload):
 
         # getting task data
         task_name = task_data.get('task_name')
-        task_id = random.randint(100000, 999999)
+        task_id = secrets.token_hex(4)
         task_status = 'incomplete'
 
         new_task = {
@@ -199,10 +206,4 @@ def tasks(user_payload):
 
 
 if __name__ == '__main__':
-    key = os.environ.get('UTOKEN_KEY', 'secret-key')
-    port = os.environ.get('PORT', 5500)
-
-    if key == 'secret-key':
-        print('\033[1;31mWARNING: PLEASE DEFINE A REAL SECRET KEY!\033[m')
-
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=SERVER_PORT)
