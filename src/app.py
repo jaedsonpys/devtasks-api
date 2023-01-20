@@ -56,7 +56,14 @@ def register():
         }
 
         response = make_response(jsonify(register_data), 201)
-        response.set_cookie('rftk', refresh_token, httponly=True)
+        response.set_cookie(
+            key='refreshToken', 
+            value=refresh_token,
+            samesite='Strict',
+            max_age=2592000,
+            httponly=True,
+            secure=True
+        )
     else:
         response = jsonify({'status': 'error', 'message': 'User already exists'}), 409
 
