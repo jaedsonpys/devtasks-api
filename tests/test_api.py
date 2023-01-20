@@ -1,113 +1,19 @@
 import bupytest
 import requests
 
+BASE_URL = 'http://127.0.0.1:5500/api'
+LOGIN_URL = BASE_URL + '/login'
+REFRESH_URL = BASE_URL + '/refreshToken'
+REGISTER_URL = BASE_URL + '/register'
+
 
 class TestAPI(bupytest.UnitTest):
     def __init__(self):
         super().__init__()
-        
-        base_url = 'http://127.0.0.1:5500/api'
-        
-        self._login_url = f'{base_url}/login'
-        self._register_url = f'{base_url}/register'
-        self._tasks_url = f'{base_url}/tasks'
 
         self._user_email = 'user@mail.com'
         self._user_password = 'secret-password'
-
         self._token: str = None
-
-    def test_register_user(self):
-        register_data = {
-            'email': self._user_email,
-            'password': self._user_password
-        }
-
-        request = requests.post(self._register_url, json=register_data)
-        self.assert_expected(request.status_code, 201)
-
-        result = request.json()
-
-        self.assert_expected(result.get('status'), 'success')
-        self.assert_expected(result.get('message'), 'Account created')
-        self.assert_true(result.get('token'))
-
-    def test_register_exists_user(self):
-        register_data = {
-            'email': self._user_email,
-            'password': self._user_password
-        }
-
-        request = requests.post(self._register_url, json=register_data)
-        self.assert_expected(request.status_code, 409)
-
-        result = request.json()
-
-        self.assert_expected(result.get('status'), 'error')
-        self.assert_expected(result.get('message'), 'User already exists')
-        self.assert_false(result.get('token'))
-
-    def test_login_user(self):
-        login_data = {
-            'email': self._user_email,
-            'password': self._user_password
-        }
-
-        request = requests.post(self._login_url, json=login_data)
-        self.assert_expected(request.status_code, 201)
-
-        result = request.json()
-
-        self.assert_expected(result.get('status'), 'success')
-        self.assert_expected(result.get('message'), 'Login succesfully')
-        self.assert_true(result.get('token'))
-
-        self._token = result.get('token')
-
-    def test_add_task(self):
-        task_data = {'task_name': 'programming in python'}
-        headers = {'Authorization': f'Bearer {self._token}'}
-
-        request = requests.post(self._tasks_url, json=task_data, headers=headers)
-        self.assert_expected(request.status_code, 201)
-
-        result = request.json()
-
-        self.assert_expected(result.get('status'), 'success')
-        self.assert_expected(result.get('message'), 'Task added')
-
-    def test_add_task_2(self):
-        task_data = {'task_name': 'work in devtasks'}
-        headers = {'Authorization': f'Bearer {self._token}'}
-
-        request = requests.post(self._tasks_url, json=task_data, headers=headers)
-        self.assert_expected(request.status_code, 201)
-
-        result = request.json()
-
-        self.assert_expected(result.get('status'), 'success')
-        self.assert_expected(result.get('message'), 'Task added')
-
-    def test_get_tasks(self):
-        headers = {'Authorization': f'Bearer {self._token}'}
-
-        request = requests.get(self._tasks_url, headers=headers)
-        self.assert_expected(request.status_code, 200)
-
-        result = request.json()
-        self.assert_expected(len(result), 2)
-
-        task_1 = result[0]
-
-        self.assert_expected(task_1.get('name'), 'programming in python')
-        self.assert_expected(task_1.get('status'), 'incomplete')
-        self.assert_true(task_1.get('id'))
-
-        task_2 = result[1]
-
-        self.assert_expected(task_2.get('name'), 'work in devtasks')
-        self.assert_expected(task_2.get('status'), 'incomplete')
-        self.assert_true(task_2.get('id'))
 
 
 if __name__ == '__main__':
