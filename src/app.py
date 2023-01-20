@@ -2,8 +2,9 @@ import secrets
 
 import bcrypt
 from cookiedb import CookieDB
-from flask import Flask, jsonify, make_response, request
+from flask import Flask, after_this_request, jsonify, make_response, request
 from flask_cors import CORS
+from flask_restful import Api, Resource
 
 from auth import UserAuth
 from config import enviroment
@@ -15,6 +16,7 @@ SERVER_PORT = enviroment['SERVER_PORT']
 user_auth = UserAuth()
 app = Flask(__name__)
 cors = CORS(app)
+api = Api(app)
 
 app.config['SECRET_KEY'] = SECRET_KEY
 
@@ -23,51 +25,51 @@ db.create_database('devtasks', if_not_exists=True)
 db.open('devtasks')
 
 
-@app.route('/api/register', methods=['POST'])
-def register():
-    data = request.json
-
-    if not data or not data.get('email') or not data.get('password'):
-        return jsonify({'status': 'error', 'message': 'Invalid register JSON'}), 400
-
-    email = data.get('email')
-    password = data.get('password')
-
-    user_exists = db.get(f'users/{email}')
-
-    if not user_exists:
-        salt = bcrypt.gensalt()
-        hashed_pw = bcrypt.hashpw(password.encode(), salt).decode()
-        auth_token = user_auth.generate_user_token(email)
-        refresh_token = user_auth.generate_refresh_token(email)
-
-        db.add(
-            path=f'users/{email}',
-            value={
-                'email': email,
-                'password': hashed_pw
-            }
-        )
-
-        register_data = {
-            'status': 'success',
-            'message': 'Account created',
-            'token': auth_token
-        }
-
-        response = make_response(jsonify(register_data), 201)
+def set_refresh_token_cookie(token: str):
+    @after_this_request
+    def set_cookie(response):
         response.set_cookie(
             key='refreshToken', 
-            value=refresh_token,
+            value=token,
             samesite='Strict',
             max_age=2592000,
             httponly=True,
             secure=True
         )
-    else:
-        response = jsonify({'status': 'error', 'message': 'User already exists'}), 409
 
-    return response
+
+class Register(Resource):
+    def post(self):
+        data = request.json
+
+        if not data or not data.get('email') or not data.get('password'):
+            return jsonify({'status': 'error', 'message': 'Invalid register JSON'}), 400
+
+        email = data.get('email')
+        password = data.get('password')
+        user_exists = db.get(f'users/{email}')
+
+        if not user_exists:
+            salt = bcrypt.gensalt()
+            hashed_pw = bcrypt.hashpw(password.encode(), salt).decode()
+            auth_token = user_auth.generate_user_token(email)
+            refresh_token = user_auth.generate_refresh_token(email)
+            set_refresh_token_cookie(refresh_token)
+
+            db.add(path=f'users/{email}', value={
+                'email': email,
+                'password': hashed_pw
+            })
+
+            response = {
+                'status': 'success',
+                'message': 'Account created',
+                'token': auth_token
+            }
+        else:
+            response = jsonify({'status': 'error', 'message': 'User already exists'}), 409
+
+        return response
 
 
 @app.route('/api/login', methods=['POST'])
