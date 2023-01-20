@@ -56,6 +56,22 @@ class TestAPI(bupytest.UnitTest):
         self.assert_expected(data.get('status'), 'error')
         self.assert_false(data.get('token'))
 
+    def test_login(self):
+        response = requests.post(LOGIN_URL, json=self.login_data)
+        self.assert_expected(response.status_code, 201)
+
+        data = response.json()
+
+        refresh_token = response.cookies.get('refreshToken')
+        access_token = data.get('token')
+
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+
+        self.assert_expected(data.get('status'), 'success')
+        self.assert_true(refresh_token)
+        self.assert_true(access_token)
+
 
 if __name__ == '__main__':
     bupytest.this()
