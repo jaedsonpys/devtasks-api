@@ -1,11 +1,14 @@
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 from functools import wraps
 from typing import Union
 
 import utoken
 from flask import jsonify, request
 from utoken import exceptions as u_exception
+
+REFRESH_EXP_TIME = timedelta(days=30)
+ACCESS_EXP_TIME = timedelta(minutes=5)
 
 
 class UserAuth:
@@ -17,15 +20,12 @@ class UserAuth:
 
     def generate_user_token(self, email: str) -> str:
         utoken_key = self._get_user_key()
-        token_exp = datetime.now() + timedelta(days=10)
-
-        auth_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
+        auth_token = utoken.encode({'email': email}, utoken_key, expires_in=ACCESS_EXP_TIME)
         return auth_token
 
     def generate_refresh_token(self, email: str) -> str:
         utoken_key = self._get_refresh_key()
-        token_exp = datetime.now() + timedelta(days=10)
-        refresh_token = utoken.encode({'email': email, 'max-time': token_exp}, utoken_key)
+        refresh_token = utoken.encode({'email': email}, utoken_key, expires_in=REFRESH_EXP_TIME)
         return refresh_token
 
     def has_valid_user_token(self, token: str) -> Union[bool, dict]:
