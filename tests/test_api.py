@@ -86,6 +86,22 @@ class TestAPI(bupytest.UnitTest):
         self.assert_false(refresh_token)
         self.assert_false(access_token)
 
+    def test_refresh_token(self):
+        response = requests.get(REFRESH_URL, cookies={'refreshToken': self.refresh_token})
+        self.assert_expected(response.status_code, 201)
+
+        data = response.json()
+
+        refresh_token = response.cookies.get('refreshToken')
+        access_token = data.get('token')
+
+        self.assert_true(self.refresh_token != refresh_token)
+        self.assert_true(refresh_token)
+        self.assert_true(access_token)
+
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+
 
 if __name__ == '__main__':
     bupytest.this()
