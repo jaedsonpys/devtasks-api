@@ -118,6 +118,16 @@ class TestAPI(bupytest.UnitTest):
         self.assert_expected(data.get('status'), 'incomplete')
         self.assert_true(data.get('id'))
 
+    def test_get_tasks(self):
+        response = requests.get(TASKS_URL, headers=self._get_auth())
+        self.assert_expected(response.status_code, 200)
+
+        data = response.json()
+
+        self.assert_expected(len(data), 1)
+        self.assert_expected(data[0]['name'], 'My Task')
+        self.assert_expected(data[0]['status'], 'incomplete')
+
 
 if __name__ == '__main__':
     bupytest.this()
