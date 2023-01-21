@@ -131,6 +131,18 @@ class TestAPI(bupytest.UnitTest):
 
         self._task_id = data[0]['id']
 
+    def test_update_task_status(self):
+        data = {'id': self._task_id, 'status': 'complete'}
+        response = requests.put(TASKS_URL, json=data, headers=self._get_auth())
+        self.assert_expected(response.status_code, 201)
+
+        data = response.json()
+
+        self.assert_expected(len(data), 3)
+        self.assert_expected(data['name'], 'My Task')
+        self.assert_expected(data['status'], 'complete')
+        self.assert_expected(data['id'], self._task_id)
+
 
 if __name__ == '__main__':
     bupytest.this()
