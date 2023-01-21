@@ -143,6 +143,13 @@ class TestAPI(bupytest.UnitTest):
         self.assert_expected(data['status'], 'complete')
         self.assert_expected(data['id'], self._task_id)
 
+    def test_delete_task(self):
+        data = {'id': self._task_id}
+        response = requests.delete(TASKS_URL, json=data, headers=self._get_auth())
+        self.assert_expected(response.status_code, 200)
+        data = response.json()
+        self.assert_expected(data.get('status'), 'success')
+
 
 if __name__ == '__main__':
     bupytest.this()
