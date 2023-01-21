@@ -153,7 +153,7 @@ class Tasks(Resource):
 
     def post(self, user_payload: dict):
         user_email = user_payload['email']
-        task_data = request.json
+        task_data: dict = request.json
 
         if not task_data or not task_data.get('name'):
             return {'status': 'error', 'message': 'Invalid task data'}, 400
@@ -177,13 +177,13 @@ class Tasks(Resource):
 
     def put(self, user_payload: dict):
         user_email = user_payload['email']
-        task_data = request.json
+        task_data: dict = request.json
 
-        if not task_data or not task_data.get('task_status') or not task_data.get('task_id'):
+        if not task_data or not task_data.get('status') or not task_data.get('id'):
             return {'status': 'error', 'message': 'Invalid task data'}, 400
 
-        task_status = task_data.get('task_status')
-        task_id = task_data.get('task_id')
+        task_status = task_data.get('status')
+        task_id = task_data.get('id')
         updated_task = None
 
         tasks_list = db.get(f'users/{user_email}/tasks') or []
@@ -210,13 +210,13 @@ class Tasks(Resource):
 
     def delete(self, user_payload: dict):
         user_email = user_payload['email']
-        task_data = request.json
+        task_data: dict = request.json
 
-        if not task_data or not task_data.get('task_id'):
+        if not task_data or not task_data.get('id'):
             return {'status': 'error', 'message': 'Invalid task data'}, 400
 
         deleted_task = None
-        task_id = task_data.get('task_id')
+        task_id = task_data.get('id')
         tasks_list = db.get(f'users/{user_email}/tasks') or []
 
         for index, task in enumerate(tasks_list):
