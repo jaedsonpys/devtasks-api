@@ -14,7 +14,7 @@ DATABASE_KEY = enviroment['DATABASE_KEY']
 SERVER_PORT = enviroment['SERVER_PORT']
 
 app = Flask(__name__)
-cors = CORS(app)
+cors = CORS(app, supports_credentials=True)
 api = Api(app, prefix='/api')
 auth = Auth()
 
@@ -128,7 +128,7 @@ class Refresh(Resource):
             if payload and not token_in_blacklist(refresh_token):
                 # generate a new access and refresh token
                 new_access_token = auth.generate_access_token(payload['email'])
-                new_refresh_token = auth.generate_access_token(payload['email'])
+                new_refresh_token = auth.generate_refresh_token(payload['email'])
 
                 # revoke previous refresh token
                 revoke_token(refresh_token)
