@@ -3,7 +3,7 @@ from functools import wraps
 from typing import Union
 
 import utoken
-from flask import jsonify, request
+from flask import request
 from utoken import exceptions as u_exception
 
 from config import enviroment
@@ -15,8 +15,8 @@ REFRESH_TOKEN_KEY = enviroment['REFRESH_TOKEN_KEY']
 ACCESS_TOKEN_KEY = enviroment['ACCESS_TOKEN_KEY']
 
 
-class UserAuth:
-    def generate_user_token(self, email: str) -> str:
+class Auth:
+    def generate_access_token(self, email: str) -> str:
         token = utoken.encode(
             payload={'email': email},
             key=ACCESS_TOKEN_KEY,
@@ -61,18 +61,18 @@ class UserAuth:
                 try:
                     auth_type, token = authorization.split(' ')
                 except ValueError:
-                    response = jsonify({'status': 'error', 'message': 'Please use Bearer Token'}), 401
+                    response = {'status': 'error', 'message': 'Please use Bearer Token'}, 401
                 else:
                     if auth_type == 'Bearer':
                         valid_token = self.has_valid_user_token(token)
                         if not valid_token:
-                            response = jsonify({'status': 'error', 'message': 'Invalid auth token'}), 401
+                            response = {'status': 'error', 'message': 'Invalid auth token'}, 401
                         else:
                             response = func(valid_token)
                     else:
-                        response = jsonify({'status': 'error', 'message': 'Please use Bearer Token'}), 401
+                        response = {'status': 'error', 'message': 'Please use Bearer Token'}, 401
             else:
-                response = jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+                response = {'status': 'error', 'message': 'Unauthorized'}, 401
 
             return response
 
