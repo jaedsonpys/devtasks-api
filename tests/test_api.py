@@ -107,6 +107,13 @@ class TestAPI(bupytest.UnitTest):
         self.access_token = access_token
         self.refresh_token = refresh_token
 
+    def test_tasks_endpoint_without_auth(self):
+        response = requests.get(TASKS_URL)
+        self.assert_expected(response.status_code, 401)
+        data = response.json()
+        self.assert_expected(data['status'], 'error')
+        self.assert_expected(data['message'], 'Unauthorized')
+
     def test_add_task(self):
         task = {'name': 'My Task'}
         response = requests.post(TASKS_URL, json=task, headers=self._get_auth())
