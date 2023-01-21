@@ -127,14 +127,14 @@ class Refresh(Resource):
 
             if payload and not token_in_blacklist(refresh_token):
                 # generate a new access and refresh token
-                access_token = auth.generate_access_token(payload['email'])
-                refresh_token = auth.generate_access_token(payload['email'])
+                new_access_token = auth.generate_access_token(payload['email'])
+                new_refresh_token = auth.generate_access_token(payload['email'])
 
                 # revoke previous refresh token
                 revoke_token(refresh_token)
-                set_refresh_token_cookie(refresh_token)
+                set_refresh_token_cookie(new_refresh_token)
 
-                response = {'token': access_token}, 201
+                response = {'token': new_access_token}, 201
             else:
                 response = {'status': 'error', 'message': 'Invalid Refresh Token'}, 406
         else:
