@@ -127,6 +127,9 @@ class TestAPI(bupytest.UnitTest):
         self.assert_expected(len(data), 1)
         self.assert_expected(data[0]['name'], 'My Task')
         self.assert_expected(data[0]['status'], 'incomplete')
+        self.assert_true(data[0]['id'])
+
+        self._task_id = data[0]['id']
 
 
 if __name__ == '__main__':
