@@ -17,6 +17,7 @@ class TestAPI(bupytest.UnitTest):
 
         self.access_token: str = None
         self.refresh_token: str = None
+        self.old_refresh_token: str = None
 
         email_id = random.randint(1000, 9999)
         email = f'dev{email_id}@mail.com'
@@ -104,8 +105,18 @@ class TestAPI(bupytest.UnitTest):
         self.assert_true(refresh_token)
         self.assert_true(access_token)
 
+        self.old_refresh_token = self.refresh_token
         self.access_token = access_token
         self.refresh_token = refresh_token
+
+    def test_refresh_with_old_token(self):
+        response = requests.get(REFRESH_URL, cookies={'refreshToken': self.old_refresh_token})
+        self.assert_expected(response.status_code, 406)
+
+        data = response.json()
+
+        self.assert_expected(data['status'], 'error')
+        self.assert_expected(data['message'], 'Invalid Refresh Token')
 
     def test_tasks_endpoint_without_auth(self):
         response = requests.get(TASKS_URL)
