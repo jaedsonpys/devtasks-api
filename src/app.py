@@ -42,7 +42,7 @@ def set_refresh_token_cookie(token: str):
         response.set_cookie(
             key='refreshToken', 
             value=token,
-            samesite='Strict',
+            samesite='None',
             max_age=2592000,
             httponly=True,
             secure=True
