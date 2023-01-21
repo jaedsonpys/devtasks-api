@@ -150,6 +150,13 @@ class TestAPI(bupytest.UnitTest):
         data = response.json()
         self.assert_expected(data.get('status'), 'success')
 
+    def test_get_tasks_2(self):
+        response = requests.get(TASKS_URL, headers=self._get_auth())
+        self.assert_expected(response.status_code, 200)
+
+        data = response.json()
+        self.assert_expected(len(data), 0)
+
 
 if __name__ == '__main__':
     bupytest.this()
