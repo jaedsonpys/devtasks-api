@@ -126,15 +126,16 @@ class TestAPI(bupytest.UnitTest):
         self.assert_expected(data['message'], 'Unauthorized')
 
     def test_add_task(self):
-        task = {'name': 'My Task'}
+        task = {'name': 'My Task', 'tag': 'projectA'}
         response = requests.post(TASKS_URL, json=task, headers=self._get_auth())
         self.assert_expected(response.status_code, 201)
 
         data = response.json()
 
+        self.assert_true(data.get('id'))
+        self.assert_expected(data.get('tag'), 'projectA')
         self.assert_expected(data.get('name'), 'My Task')
         self.assert_expected(data.get('status'), 'incomplete')
-        self.assert_true(data.get('id'))
 
     def test_get_tasks(self):
         response = requests.get(TASKS_URL, headers=self._get_auth())
@@ -143,9 +144,11 @@ class TestAPI(bupytest.UnitTest):
         data = response.json()
 
         self.assert_expected(len(data), 1)
+
+        self.assert_true(data[0]['id'])
+        self.assert_expected(data[0]['tag'], 'projectA')
         self.assert_expected(data[0]['name'], 'My Task')
         self.assert_expected(data[0]['status'], 'incomplete')
-        self.assert_true(data[0]['id'])
 
         self._task_id = data[0]['id']
 
@@ -156,10 +159,12 @@ class TestAPI(bupytest.UnitTest):
 
         data = response.json()
 
-        self.assert_expected(len(data), 3)
+        self.assert_expected(len(data), 4)
+
+        self.assert_expected(data['id'], self._task_id)
+        self.assert_expected(data['tag'], 'projectA')
         self.assert_expected(data['name'], 'My Task')
         self.assert_expected(data['status'], 'complete')
-        self.assert_expected(data['id'], self._task_id)
 
     def test_delete_task(self):
         data = {'id': self._task_id}
