@@ -155,16 +155,18 @@ class Tasks(Resource):
         user_email = user_payload['email']
         task_data: dict = request.json
 
-        if not task_data or not task_data.get('name'):
+        task_name = task_data.get('name')
+        task_tag = task_data.get('tag')
+
+        if not task_data or not all([task_name, task_tag]):
             return {'status': 'error', 'message': 'Invalid task data'}, 400
 
-        # getting task data
-        task_name = task_data.get('name')
         task_id = secrets.token_hex(4)
         task_status = 'incomplete'
 
         new_task = {
             'id': task_id,
+            'tag': task_tag,
             'name': task_name,
             'status': task_status
         }
@@ -179,20 +181,21 @@ class Tasks(Resource):
         user_email = user_payload['email']
         task_data: dict = request.json
 
-        if not task_data or not task_data.get('status') or not task_data.get('id'):
-            return {'status': 'error', 'message': 'Invalid task data'}, 400
-
         task_status = task_data.get('status')
         task_id = task_data.get('id')
-        updated_task = None
 
+        if not task_data or not all([task_status, task_id]):
+            return {'status': 'error', 'message': 'Invalid task data'}, 400
+
+        updated_task = None
         tasks_list = db.get(f'users/{user_email}/tasks') or []
 
         for index, task in enumerate(tasks_list):
             if task['id'] == task_id:
                 updated_task = {
-                    'name': task['name'],
                     'id': task_id,
+                    'tag': task['tag'],
+                    'name': task['name'],
                     'status': task_status
                 }
 
