@@ -194,7 +194,7 @@ class Tasks(Resource):
             if task['id'] == task_id:
                 updated_task = {
                     'id': task_id,
-                    'tag': task['tag'],
+                    'tag': task.get('tag', 'global'),
                     'name': task['name'],
                     'status': task_status
                 }
