@@ -18,11 +18,9 @@ cors = CORS(app, supports_credentials=True)
 api = Api(app, prefix='/api')
 auth = Auth()
 
-app.config['SECRET_KEY'] = SECRET_KEY
+db = CookieDB('devtasks', key=DATABASE_KEY)
 
-db = CookieDB(key=DATABASE_KEY)
-db.create_database('devtasks', if_not_exists=True)
-db.open('devtasks')
+app.config['SECRET_KEY'] = SECRET_KEY
 
 
 def revoke_token(*tokens: str):
@@ -148,7 +146,7 @@ class Tasks(Resource):
 
     def get(self, user_payload: dict):
         user_email = user_payload['email']
-        tasks_list = db.get(f'users/{user_email}/tasks') or []
+        tasks_list = db.get(f'users/{user_email}/tasks') or {}
         return tasks_list, 200
 
     def post(self, user_payload: dict):
@@ -166,15 +164,14 @@ class Tasks(Resource):
 
         new_task = {
             'id': task_id,
-            'tag': task_tag,
             'name': task_name,
             'status': task_status
         }
 
-        tasks_list = db.get(f'users/{user_email}/tasks') or []
-        tasks_list.append(new_task)
-        db.add(f'users/{user_email}/tasks', tasks_list)
+        if not db.get(f'users/{user_email}/tasks/{task_tag}'):
+            db.add(f'users/{user_email}/tasks/{task_tag}', [])
 
+        db.append(f'users/{user_email}/tasks/{task_tag}', new_task)
         return new_task, 201
 
     def put(self, user_payload: dict):
@@ -188,22 +185,23 @@ class Tasks(Resource):
             return {'status': 'error', 'message': 'Invalid task data'}, 400
 
         updated_task = None
-        tasks_list = db.get(f'users/{user_email}/tasks') or []
+        tasks_list = db.get(f'users/{user_email}/tasks') or {}
 
-        for index, task in enumerate(tasks_list):
-            if task['id'] == task_id:
-                updated_task = {
-                    'id': task_id,
-                    'tag': task.get('tag', 'global'),
-                    'name': task['name'],
-                    'status': task_status
-                }
+        for task_tag, tasks in tasks_list.items():
+            for index, task in enumerate(tasks):
+                if task['id'] == task_id:
+                    updated_task = {
+                        'id': task_id,
+                        'tag': task.get('tag', 'global'),
+                        'name': task['name'],
+                        'status': task_status
+                    }
 
-                tasks_list.pop(index)
-                break
+                    tasks_list[task_tag].pop(index)
+                    break
 
         if updated_task:
-            tasks_list.append(updated_task)
+            tasks_list[task_tag].append(updated_task)
             db.add(f'users/{user_email}/tasks', tasks_list)
             response = updated_task, 201
         else:
@@ -220,14 +218,18 @@ class Tasks(Resource):
 
         deleted_task = None
         task_id = task_data.get('id')
-        tasks_list = db.get(f'users/{user_email}/tasks') or []
+        tasks_list = db.get(f'users/{user_email}/tasks') or {}
 
-        for index, task in enumerate(tasks_list):
-            if task['id'] == task_id:
-                deleted_task = tasks_list.pop(index)
-                break
+        for task_tag, tasks in tasks_list.items():
+            for index, task in enumerate(tasks):
+                if task['id'] == task_id:
+                    deleted_task = tasks_list[task_tag].pop(index)
+                    break
 
         if deleted_task:
+            if not len(tasks_list[task_tag]):
+                tasks_list.pop(task_tag)
+
             db.add(f'users/{user_email}/tasks', tasks_list)
             response = {'status': 'success', 'message': f'Task #{task_id} deleted'}, 200
         else:
