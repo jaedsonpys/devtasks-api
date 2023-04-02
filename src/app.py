@@ -221,24 +221,22 @@ class Tasks(Resource):
         if not task_data or not task_data.get('id'):
             return {'status': 'error', 'message': 'Invalid task data'}, 400
 
-        deleted_task = None
         task_id = task_data.get('id')
         tasks_list = db.get(f'users/{user_email}/tasks') or {}
 
+        new_task_data = {}
+
         for task_tag, tasks in tasks_list.items():
-            for index, task in enumerate(tasks):
-                if task['id'] == task_id:
-                    deleted_task = tasks_list[task_tag].pop(index)
-                    break
+            new_task_data[task_tag] = []
+            for task in tasks:
+                if task['id'] != task_id:
+                    new_task_data[task_tag].append(task)
+                    
+            if not len(new_task_data[task_tag]):
+                new_task_data.pop(task_tag)
 
-        if deleted_task:
-            if not len(tasks_list[task_tag]):
-                tasks_list.pop(task_tag)
-
-            db.add(f'users/{user_email}/tasks', tasks_list)
-            response = {'status': 'success', 'message': f'Task #{task_id} deleted'}, 200
-        else:
-            response = {'status': 'error', 'message': 'Task ID not found'}, 404
+        db.add(f'users/{user_email}/tasks', new_task_data)
+        response = {'status': 'success', 'message': f'Task #{task_id} deleted'}, 200
 
         return response
 
