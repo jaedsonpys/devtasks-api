@@ -147,7 +147,10 @@ class Tasks(Resource):
     def get(self, user_payload: dict):
         user_email = user_payload['email']
         tasks_list = db.get(f'users/{user_email}/tasks') or {}
-        return tasks_list, 200
+
+        sort_tasks = {'global': tasks_list.pop('global')}
+        sort_tasks.update(tasks_list)
+        return sort_tasks, 200
 
     def post(self, user_payload: dict):
         user_email = user_payload['email']
