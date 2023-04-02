@@ -248,4 +248,4 @@ api.add_resource(Refresh, '/refreshToken')
 api.add_resource(Tasks, '/tasks')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=SERVER_PORT)
+    app.run(host='0.0.0.0', port=SERVER_PORT, debug=bool(enviroment.get('DEBUG', False)))
