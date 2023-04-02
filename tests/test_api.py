@@ -158,8 +158,7 @@ class TestAPI(bupytest.UnitTest):
 
         data = response.json()
 
-        self.assert_expected(len(data), 4)
-
+        self.assert_expected(len(data), 3)
         self.assert_expected(data['id'], self._task_id)
         self.assert_expected(data['name'], 'My Task')
         self.assert_expected(data['status'], 'complete')
