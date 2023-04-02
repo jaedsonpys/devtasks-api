@@ -198,16 +198,15 @@ class Tasks(Resource):
                 if task['id'] == task_id:
                     updated_task = {
                         'id': task_id,
-                        'tag': task.get('tag', 'global'),
                         'name': task['name'],
                         'status': task_status
                     }
 
+                    tasks_list[task_tag].append(updated_task)
                     tasks_list[task_tag].pop(index)
                     break
 
         if updated_task:
-            tasks_list[task_tag].append(updated_task)
             db.add(f'users/{user_email}/tasks', tasks_list)
             response = updated_task, 201
         else:
